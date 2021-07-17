@@ -6,3 +6,8 @@ build
 
 #Ignore my API token file.
 Token.*
+
+#Ignore some things specific to my project:
+lib/
+!lib/src/
+.settings
