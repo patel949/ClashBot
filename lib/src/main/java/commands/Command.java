@@ -56,7 +56,9 @@ public class Command {
 		String[] hooks = {"ping"};
 		return hooks;
 	}
-	
+	/*
+	 * Add new commands here, following the example for Manage command.
+	 */
 	public static void fillCommandTable(HashMap<String, Command> commands) {
 		//Add all commands and hooks here.
 		String[] hooks = Command.getInstance().getHooks();

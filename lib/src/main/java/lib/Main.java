@@ -7,7 +7,7 @@ import net.dv8tion.jda.api.JDABuilder;
 
 public class Main {
 	
-	private static String TOKEN = "NDAzMzg0MTUyMDI1NDY0ODMy.WmAOxA.eqNwV3HMt7tNWkK55q-0wH4ChWk";//"NDczNTkyNDM2NTUyMjM3MDkx.W195Uw.HyllAo3tYYBC5DacDqsieY86Eik";
+	private static String TOKEN = Token.getToken(); //Token hidden on git
 	
 	public static void main(String[] args) {
 		try {

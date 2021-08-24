@@ -35,13 +35,38 @@ public class Player extends Command {
 		
 		if (command[1].equalsIgnoreCase("Promote")) {
 			List<Member> players = e.getMessage().getMentionedMembers();
+			//For each player to be promoted:
 			for (Member player : players) {
-				//Check the current 
+				//if member is self, say "you can't promote yourself." and move on.
+				
+				//Check the players's current rank
+				
+				//Check the requester's rank
+				
+				//if the requester has a higher rank than the player, promotion is okay.
+				
+				//If promotion is to leader, demote self.
+				
+				//otherwise, report that their rank is not high enough.
+				
 			}
 		}
 		
 		else if (command[1].equalsIgnoreCase("Demote")) {
 			List<Member> players = e.getMessage().getMentionedMembers();
+			//For each player to be demoted:
+			for (Member player : players) {
+				//if member is self, say "you can't demote yourself." and move on.
+				
+				//Check the players's current rank
+				
+				//Check the requester's rank
+				
+				//if the requester has a higher rank than the player, demotion is okay.
+				
+				//else, report that their rank is not high enough.
+				
+			}
 		}
 	}
 }
