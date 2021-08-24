@@ -21,7 +21,7 @@ public class Player extends Command {
 	//get a list of "hooks"
 	@Override
 	public String[] getHooks() {
-		String[] hooks = {"manage"};
+		String[] hooks = {"player"};
 		return hooks;
 	}
 	
@@ -34,21 +34,23 @@ public class Player extends Command {
 		}
 		
 		if (command[1].equalsIgnoreCase("Promote")) {
+			//First, get the level of the current player.
+			boolean promoteToLeader = Command.permissable(e.getMember(), Command.userPerms.ADMIN); //Admin and Leader are nearly identical
+			boolean promoteToColeader = promoteToLeader || Command.permissable(e.getMember(), Command.userPerms.COLEADER);
+			boolean promoteToElder = promoteToColeader || Command.permissable(e.getMember(), Command.userPerms.ELDER);
+			
+			//If you can't even promote someone to elder, quit now.
+			if (!promoteToElder)
+				return;
+			
+			//For each mentioned player, either promote or fail to promote.
 			List<Member> players = e.getMessage().getMentionedMembers();
 			//For each player to be promoted:
 			for (Member player : players) {
-				//if member is self, say "you can't promote yourself." and move on.
-				
-				//Check the players's current rank
-				
-				//Check the requester's rank
-				
-				//if the requester has a higher rank than the player, promotion is okay.
-				
-				//If promotion is to leader, demote self.
-				
-				//otherwise, report that their rank is not high enough.
-				
+				userPerms p = Command.getHighestRole(player);
+				if (p == userPerms.GUEST) {
+					e.getGuild().addRoleToMember(player, e.getGuild().getRolesByName("",false).get(0));
+				}
 			}
 		}
 		

@@ -94,26 +94,55 @@ public class Command {
 		if (permissionLevel == userPerms.GUEST)
 			return true; //everyone has this level for now.
 		
-		List<Role> roles = member.getRoles();
-		if (roles.stream().filter(role -> role.getName().equals("Leader")).count() > 0)
+		userPerms highestRole = getHighestRole(member);
+		if (highestRole == userPerms.LEADER)
 			return true;
 		if (permissionLevel == userPerms.LEADER)
 			return false;
-		if (roles.stream().filter(role -> role.getName().equals("Admin")).count() > 0)
+		if (highestRole == userPerms.ADMIN)
 			return true;
 		if (permissionLevel == userPerms.ADMIN)
 			return false;
-		if (roles.stream().filter(role -> role.getName().equals("Co-Leader")).count() > 0)
+		if (highestRole == userPerms.COLEADER)
 			return true;
 		if (permissionLevel == userPerms.COLEADER)
 			return false;
-		if (roles.stream().filter(role -> role.getName().equals("Elder")).count() > 0)
+		if (highestRole == userPerms.ELDER)
 			return true;
 		if (permissionLevel == userPerms.ELDER)
 			return false;
-		if (roles.stream().filter(role -> role.getName().equalsIgnoreCase("Member")).count() > 0)
+		if (highestRole == userPerms.MEMBER)
 			return true;
+		
 		return false;
+		
+	}
+	
+	public static userPerms getHighestRole(Member member) {
+		
+		List<Role> roles = member.getRoles();
+		
+		if (roles.stream().filter(role -> role.getName().equals("Leader")).count() > 0)
+			return userPerms.LEADER;
+		if (roles.stream().filter(role -> role.getName().equals("Admin")).count() > 0)
+			return userPerms.ADMIN;
+		if (roles.stream().filter(role -> role.getName().equals("Co-Leader")).count() > 0)
+			return userPerms.COLEADER;
+		if (roles.stream().filter(role -> role.getName().equals("Elder")).count() > 0)
+			return userPerms.ELDER;
+		if (roles.stream().filter(role -> role.getName().equalsIgnoreCase("Member")).count() > 0)
+			return userPerms.MEMBER;
+		
+		return userPerms.GUEST;
+	}
+	
+	public static void promoteMember(Member member, userPerms role) {
+		if (role == userPerms.MEMBER) {
+			member.getGuild().addRoleToMember(member, member.getGuild().getRolesByName("Member", false).get(0));
+		}
+	}
+	
+	public static void demoteMember(Member member, userPerms newRole) {
 		
 	}
 	
