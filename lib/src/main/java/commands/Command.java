@@ -64,9 +64,16 @@ public class Command {
 		String[] hooks = Command.getInstance().getHooks();
 		for (String hook : hooks)
 			commands.put(hook, Command.getInstance());
+		
+		
 		hooks = Manage.getInstance().getHooks();
 		for (String hook : hooks)
 			commands.putIfAbsent(hook, Manage.getInstance());
+		
+		
+		hooks = Player.getInstance().getHooks();
+		for (String hook : hooks)
+			commands.putIfAbsent(hook, Player.getInstance());
 	}
 	
 	public void getHelp(MessageChannel response) {
@@ -79,12 +86,20 @@ public class Command {
 	 * Enum that controls ranks used by the bot
 	 */
 	public enum userPerms {
-		GUEST,
-		MEMBER,
-		ELDER,
-		COLEADER,
-		ADMIN,
-		LEADER
+		GUEST(0),
+		MEMBER(1),
+		ELDER(2),
+		COLEADER(3),
+		ADMIN(4),
+		LEADER(5);
+
+		int rank;
+		userPerms(int rank) {
+			this.rank = rank;
+		}
+		int getRank() {
+			return rank;
+		}
 	}
 	
 	/*
@@ -124,8 +139,6 @@ public class Command {
 		
 		if (roles.stream().filter(role -> role.getName().equals("Leader")).count() > 0)
 			return userPerms.LEADER;
-		if (roles.stream().filter(role -> role.getName().equals("Admin")).count() > 0)
-			return userPerms.ADMIN;
 		if (roles.stream().filter(role -> role.getName().equals("Co-Leader")).count() > 0)
 			return userPerms.COLEADER;
 		if (roles.stream().filter(role -> role.getName().equals("Elder")).count() > 0)
@@ -136,14 +149,59 @@ public class Command {
 		return userPerms.GUEST;
 	}
 	
-	public static void promoteMember(Member member, userPerms role) {
-		if (role == userPerms.MEMBER) {
-			member.getGuild().addRoleToMember(member, member.getGuild().getRolesByName("Member", false).get(0));
-		}
+	public static boolean isAdmin(Member member) {
+		return (member.getRoles().stream().filter(role -> role.getName().equals("Admin")).count() > 0);
 	}
 	
-	public static void demoteMember(Member member, userPerms newRole) {
+	public static void promoteMember(Member member) {
+		userPerms role = getHighestRole(member);
 		
+		if (role == userPerms.LEADER)
+			return; //cannot promote from this role - it's the highest.
+		Role addRole = null;
+		Role remRole = null;
+		if (role == userPerms.GUEST) {
+			remRole = member.getGuild().getRolesByName("Guest"    , false).get(0);
+			addRole = member.getGuild().getRolesByName("Member"   , false).get(0);
+		} else if (role == userPerms.MEMBER) {
+			remRole = member.getGuild().getRolesByName("Member"   , false).get(0);
+			addRole = member.getGuild().getRolesByName("Elder"    , false).get(0);
+		} else if (role == userPerms.ELDER) {
+			remRole = member.getGuild().getRolesByName("Elder"    , false).get(0);
+			addRole = member.getGuild().getRolesByName("Co-Leader", false).get(0);
+		} else if (role == userPerms.COLEADER) {
+			remRole = member.getGuild().getRolesByName("Co-Leader", false).get(0);
+			addRole = member.getGuild().getRolesByName("Leader"   , false).get(0);
+		}
+		member.getGuild().addRoleToMember(member, addRole);
+		member.getGuild().removeRoleFromMember(member, remRole);
+	
+	}
+	
+	public static void demoteMember(Member member) {
+		userPerms role = getHighestRole(member);
+		
+		if (role == userPerms.GUEST)
+			return; //can't demote further than this!
+		
+		Role addRole = null;
+		Role remRole = null;
+		if (role == userPerms.MEMBER) {
+			addRole = member.getGuild().getRolesByName("Guest"    , false).get(0);
+			remRole = member.getGuild().getRolesByName("Member"   , false).get(0);
+		} else if (role == userPerms.ELDER) {
+			addRole = member.getGuild().getRolesByName("Member"   , false).get(0);
+			remRole = member.getGuild().getRolesByName("Elder"    , false).get(0);
+		} else if (role == userPerms.COLEADER) {
+			addRole = member.getGuild().getRolesByName("Elder"    , false).get(0);
+			remRole = member.getGuild().getRolesByName("Co-Leader", false).get(0);
+		} else if (role == userPerms.LEADER) {
+			addRole = member.getGuild().getRolesByName("Co-Leader", false).get(0);
+			remRole = member.getGuild().getRolesByName("Leader"   , false).get(0);
+		}
+		member.getGuild().addRoleToMember(member, addRole);
+		member.getGuild().removeRoleFromMember(member, remRole);
+	
 	}
 	
 }

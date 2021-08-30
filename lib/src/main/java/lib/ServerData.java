@@ -1,8 +1,9 @@
 package lib;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Hashtable;
+import java.util.List;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -19,7 +20,7 @@ import java.nio.file.Paths;
 //First, each server gets their own structure, but we don't want to have to
 //load from disk on every call. that is slow. We don't have any meaningful
 //memory constraints, because this is designed to be a small bot.
-//TODO: FOR LARGER USE: Optimize memory usage!
+//TODO: FOR LARGER USE: Optimize memory usage/cache servers
 public class ServerData implements Serializable {
 	/**
 	 * Auto-generated Serial Version.
@@ -30,6 +31,12 @@ public class ServerData implements Serializable {
 	String filepath;
 	long defaultChannel = 0;
 	HashSet<String> clans = new HashSet<String>(); //keeps track of clans
+	
+	//Keep track of user aliases.
+	HashMap<String,List<Long>> alias_to_id = new HashMap<String,List<Long>>();
+	HashMap<Long,List<String>> id_to_alias = new HashMap<Long,List<String>>();
+	
+	//TODO: Keep track of **aliases** in each clan
 	
 	private ServerData(String filepath) {
 		this.filepath = filepath;
@@ -44,11 +51,6 @@ public class ServerData implements Serializable {
 			return newServer;
 		}
 		return read(path);
-	}
-
-	public boolean setDefaultChannel(long channelID) {
-		defaultChannel = channelID;
-		return write();
 	}
 	
 	private static ServerData read(String filepath) {
@@ -104,10 +106,47 @@ public class ServerData implements Serializable {
 		return write();
 	}
 	
+	public boolean addAlias(Long id, String alias) {
+		List<Long> idList = alias_to_id.getOrDefault(alias, new ArrayList<Long>());
+		idList.add(id);
+		alias_to_id.put(alias, idList);
+		
+		List<String> aliasList = id_to_alias.getOrDefault(id, new ArrayList<String>());
+		aliasList.add(alias);
+		id_to_alias.put(id, aliasList);
+		
+		return write();
+	}
+	
+	public boolean removeAlias(Long id, String alias) {
+		List<Long> idList = alias_to_id.getOrDefault(alias, new ArrayList<Long>());
+		boolean removed = idList.remove(id);
+		alias_to_id.put(alias, idList);
+		
+		List<String> aliasList = id_to_alias.getOrDefault(id, new ArrayList<String>());
+		removed |= aliasList.remove(alias);
+		id_to_alias.put(id, aliasList);
+		
+		return removed && write();
+	}
+	
+	public List<String> getAlias(Long id) {
+		return id_to_alias.get(id);
+	}
+	
+	public List<Long> getMemberFromAlias(String alias) {
+		return alias_to_id.get(alias);
+	}
+	
 	public String getPrefix() {
 		return prefix;
 	}
 
+	public boolean setDefaultChannel(long channelID) {
+		defaultChannel = channelID;
+		return write();
+	}
+	
 	public boolean addClan(String string) {
 		boolean ret = clans.add(string);
 		write();
@@ -128,7 +167,25 @@ public class ServerData implements Serializable {
 	 * Returns true if discord only has one clan.
 	 */
 	public boolean clansSingleton() {
-		return clans.size() == 0;
+		return clans.size() == 1;
+	}
+	
+	public boolean isWarring(String clanName) {
+		//TODO: build this function
+		return false;
+	}
+	
+	public List<String> getClans() {
+		return new ArrayList<String>(clans);
+	}
+	
+	public boolean clanExists(String clanName) {
+		return clans.contains(clanName);
+			
+	}
+	
+	public void startWar(String clanName) {
+		//TODO: build this function
 	}
 	
 	
