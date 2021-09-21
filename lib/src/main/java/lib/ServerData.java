@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -32,6 +33,9 @@ public class ServerData implements Serializable {
 	long defaultChannel = 0;
 	HashSet<String> clans = new HashSet<String>(); //keeps track of clans
 	
+	List<String> warMessages = new ArrayList<String>();
+	
+	
 	//Keep track of user aliases.
 	HashMap<String,List<Long>> alias_to_id = new HashMap<String,List<Long>>();
 	HashMap<Long,List<String>> id_to_alias = new HashMap<Long,List<String>>();
@@ -40,17 +44,32 @@ public class ServerData implements Serializable {
 	
 	private ServerData(String filepath) {
 		this.filepath = filepath;
+		
+		//defaults
+		warMessages.add("War is ending in an hour and a half. Please get an attack in!");
+		warMessages.add("War is ending in half an hour. please finish all attacks!");
 	}
 
-	public static ServerData getServer(String serverID) {
+	public static ServerData getServer(Long serverID) {
 		String path = "servers\\" + serverID + ".dat";
 		File f = new File(Paths.get(path).toAbsolutePath().toString());
 		if (!f.exists()) {
 			ServerData newServer = new ServerData(path);
+			newServer.setDefaultChannel(Main.getJDA().getGuildById(serverID).getDefaultChannel().getIdLong());
 			newServer.write();
 			return newServer;
 		}
 		return read(path);
+	}
+	
+	public String getWarReminder(int reminderNumber) {
+		if (reminderNumber > warMessages.size() || reminderNumber <= 0)
+			return "";
+		return warMessages.get(reminderNumber-1);
+	}
+	
+	public void setWarReminder(int reminderNumber, String reminder) {
+		warMessages.set(reminderNumber-1, reminder);
 	}
 	
 	private static ServerData read(String filepath) {
@@ -147,6 +166,10 @@ public class ServerData implements Serializable {
 		return write();
 	}
 	
+	public long getDefaultChannel() {
+		return defaultChannel;
+	}
+	
 	public boolean addClan(String string) {
 		boolean ret = clans.add(string);
 		write();
@@ -186,6 +209,26 @@ public class ServerData implements Serializable {
 	
 	public void startWar(String clanName) {
 		//TODO: build this function
+	}
+	
+	public void shiftWarEnd(String clanName, long milliseconds) {
+		//TODO: build this function
+	}
+	
+	public String getClanFromPlayer(Long playerID, String playerName) {
+		return null;
+	}
+	
+	public boolean addToWar(Long user, String alias) {
+		return true;
+	}
+	
+	public boolean removeFromWar(Long user, String alias) {
+		return true;
+	}
+	
+	public boolean attackWar(Long user, String alias) {
+		return false;
 	}
 	
 	

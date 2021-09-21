@@ -7,11 +7,12 @@ import net.dv8tion.jda.api.JDABuilder;
 
 public class Main {
 	
+	private static JDA jda;
 	private static String TOKEN = Token.getToken(); //Token hidden on git
 	
 	public static void main(String[] args) {
 		try {
-			JDA jda = JDABuilder.createDefault(TOKEN)
+			jda = JDABuilder.createDefault(TOKEN)
 					.addEventListeners(MessageListener.getMessageListener())
 					.build();
 			jda.awaitReady();
@@ -23,5 +24,9 @@ public class Main {
 			System.out.println("Check your Asynch Thread usage..");
 			e.printStackTrace();
 		}
+	}
+	
+	public static JDA getJDA() {
+		return jda;
 	}
 }

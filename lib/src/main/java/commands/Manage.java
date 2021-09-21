@@ -43,7 +43,7 @@ public class Manage extends Command {
 			if (list.size() < 1)
 				list.add(e.getTextChannel());
 			e.getChannel().sendMessage("Okay! I'll set " + list.get(0).getAsMention() + " to be my default.").queue();
-			ServerData sd = ServerData.getServer("" + e.getGuild().getIdLong());
+			ServerData sd = ServerData.getServer(e.getGuild().getIdLong());
 			sd.setDefaultChannel(list.get(0).getIdLong());
 		
 		} else if (command[1].equalsIgnoreCase("setPrefix")) {
@@ -51,7 +51,7 @@ public class Manage extends Command {
 				e.getChannel().sendMessage("You've got to specify a prefix.").queue();
 				return;
 			}
-			ServerData sd = ServerData.getServer("" + e.getGuild().getIdLong());
+			ServerData sd = ServerData.getServer(e.getGuild().getIdLong());
 			for (int i = 3; i < command.length; i++)
 				command[2] += " " + command[i]; //If I thought this was going to be a common command I might consider a stringbuilder.
 			sd.setPrefix(command[2]);
@@ -62,7 +62,7 @@ public class Manage extends Command {
 				e.getChannel().sendMessage("You've got to specify a clan name.").queue();
 				return;
 			}
-			ServerData sd = ServerData.getServer("" + e.getGuild().getIdLong());
+			ServerData sd = ServerData.getServer(e.getGuild().getIdLong());
 			for (int i = 3; i < command.length; i++)
 				command[2] += " " + command[i];
 ;			if (sd.addClan(command[2])) {
@@ -76,7 +76,7 @@ public class Manage extends Command {
 				e.getChannel().sendMessage("You've got to specify a one-word prefix.").queue();
 				return;
 			}
-			ServerData sd = ServerData.getServer("" + e.getGuild().getIdLong());
+			ServerData sd = ServerData.getServer(e.getGuild().getIdLong());
 			for (int i = 3; i < command.length; i++)
 				command[2] += " " + command[i];
 			if (sd.addClan(command[2])) {

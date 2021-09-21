@@ -1,14 +1,18 @@
 package commands;
 
 import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
-import commands.Command.userPerms;
 import lib.ServerData;
 import net.dv8tion.jda.api.entities.MessageChannel;
-import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
 public class War extends Command {
+	
+	private final static int FIRST_REMINDER_DELTA = 90 * 60; //90 minutes
+	private final static int SECOND_REMINDER_DELTA = 30 * 60; //30 minutes
 	
 	private War() {
 	}
@@ -38,86 +42,100 @@ public class War extends Command {
 			return;
 		}
 		
-		if (command[1].equalsIgnoreCase("Start")) {
-			//1. Do you have permission to start a war?
+		/*
+		 * WAR REMIND
+		 * $ WAR REMIND <**h> <**m> <**s> <@user1> ... <@userN>
+		 * 		Remind a list of users before the end of the war. Time specified is not the remind time
+		 * 		but rather one and a half hours and half an hour before the remind time. 
+		 * 		Time specified should be time until the official end of the war. 
+		 */
+		if (command[1].equalsIgnoreCase("remind")) {
+			//1. You need to be at least a co-leader to set up war reminds.
 			if (!Command.permissable(e.getMessage().getMember(), userPerms.COLEADER)) {
 				e.getChannel().sendMessage("Sorry chief, you don't have permission to do that.").queue();
 				return;
 			}
 			
-			//2. We are going to need the Server's Data at this point.
-			ServerData sd = ServerData.getServer("" + e.getGuild().getIdLong());
+			//2. We need at least one and at most three units of time. units of time should be 2-3 characters long
+			//		specifically, one to two numbers followed by a letter.
+			if (command.length < 3) {
+				e.getChannel().sendMessage("Hey! you need to properly use the command - specify an amount of time and the users to remind.").queue();
+				return;
+			}
+			if (!command[2].matches("^\\d(\\d?)[hmsHMS]")) {
+				e.getChannel().sendMessage("Usage: WAR REMIND <**h> <**m> <**s> <@user1> ... <@userN>").queue();
+				return;
+			}
+			int timeSecs = 0;
+			int currentTime = Integer.parseInt(command[2].substring(0, command[2].length()-1));
+			char type = command[2].charAt(command[2].length()-1);
+			if (type != 'S' && type != 's')
+				currentTime *= 60;
+			if (type == 'H' || type == 'h')
+				currentTime *= 60;
+			timeSecs = currentTime;
 			
-			//3. If there are currently NO clans, we can't start a war.
-			if (sd.getNumClans() == 0) {
-				e.getChannel().sendMessage("This Discord hasn't set up any affiliated clans! try \"manage addClan\"").queue();
+			if (command.length > 3 && command[3].matches("^\\d(\\d?)[hmsHMS]")) {
+				currentTime = Integer.parseInt(command[3].substring(0, command[3].length()-1));
+				type = command[3].charAt(command[3].length()-1);
+				if (type != 'S' && type != 's')
+					currentTime *= 60;
+				if (type == 'H' || type == 'h')
+					currentTime *= 60;
+				timeSecs += currentTime;
+			}
+			if (command.length > 4 && command[4].matches("^\\d(\\d?)[hmsHMS]")) {
+				currentTime = Integer.parseInt(command[4].substring(0, command[4].length()-1));
+				type = command[4].charAt(command[4].length()-1);
+				if (type != 'S' && type != 's')
+					currentTime *= 60;
+				if (type == 'H' || type == 'h')
+					currentTime *= 60;
+				timeSecs += currentTime;
+			}
+			
+			//3. get the list of mentioned players - there should be at least one.
+			if (e.getMessage().getMentionedUsers().size() == 0) {
+				e.getChannel().sendMessage("You need to include a list of users to ping in the reminder!").queue();
 				return;
 			}
 			
-			//4. If there are multiple clans, and no clan is specified, we cannot proceed.
-			if (command.length < 3 && sd.getNumClans() > 1) {
-				e.getChannel().sendMessage("You must specify a clan.");
-				return;
-			}
+			//4. craft a message.
+			ServerData sd = ServerData.getServer(e.getGuild().getIdLong());
 			
-			String clanName;
-			if (command.length < 3)
-				clanName = sd.getClans().get(0);
-			else if (command[2].equals("-c"))
-				clanName = command[3];
-			else
-				clanName = command[2];
+			MessageChannel mc = null;
+			if (sd.getDefaultChannel() == 0) {
+				e.getChannel().sendMessage("You haven't set up a default channel, so I'll be using this one.").queue();
+				mc = e.getChannel();
+			} else {
+				mc = e.getGuild().getTextChannelById(sd.getDefaultChannel());
+			}			
 			
-			//5. Is the provided clan name valid?
-			if (!sd.clanExists(clanName)) {
-				e.getChannel().sendMessage("Couldn't find clan \"" + clanName + "\" - check your spelling?");
-				return;
-			}
+			//5. Schedule the message.
+			WarRunner runner = new WarRunner(e.getGuild().getIdLong(), mc, new String[] {sd.getWarReminder(1), sd.getWarReminder(2)},e.getMessage().getMentionedUsers());
+			ScheduledExecutorService ses = Executors.newScheduledThreadPool(1);
+			ses.schedule(runner, Math.max(timeSecs-FIRST_REMINDER_DELTA, 1), TimeUnit.SECONDS);
+			ses.schedule(runner, Math.max(timeSecs-SECOND_REMINDER_DELTA,2), TimeUnit.SECONDS);
 			
-			//6. Has a war already been started?
-			if (sd.isWarring(clanName)) {
-				e.getChannel().sendMessage("Oops! There's already a war going on!").queue();
-				return;
-			}
-			
-			//7. At this point, I see no reason not to start a war.
-			sd.startWar(clanName);
-			e.getChannel().sendMessage("Great! A war has been declared! I will remind everyone that hasn't attacked at the 2.5 hour and 1 hour marks.").queue();
+			e.getChannel().sendMessage("Great! I'll remind everyone a couple times before the end of the war!").queue();
 			return;
 			
-			
-		} else if (command[1].equalsIgnoreCase("AdjustTime")) {
-		//Add or remove time until end of war (adjusts time of 1h and 2.5h remaining timers)
-		
-		} else if (command[1].equalsIgnoreCase("Add")) {
-		//Add a player account to the war
-		
-		} else if (command[1].equalsIgnoreCase("Remove")) {
-		//Remove a player account from the war
-		
-		} else if (command[1].equalsIgnoreCase("EndIn")) {
-		//Override the end time of the war to be the specified amount of time away
-		
+		/*
+		 * WAR ATTACK
+		 * $ WAR ATTACK
+		 * Signal that you used an attack in war. if you use two attacks, you don't need to 
+		 */
 		} else if (command[1].equalsIgnoreCase("Attack")) {
-		//Mark one of two attacks as used for the calling player
-		
-		} else if (command[1].equalsIgnoreCase("Remind")) {
-		//Remind everyone in war to attack with a custom message
-		
-		} else if (command[1].equalsIgnoreCase("SetMode")) {
-		//Set mode of current war to be CWL (8 days) or regular (2 days, default)
-		
-		} else if (command[1].equalsIgnoreCase("OptIn")) {
-		//Be included in war by default
-		
-		} else if (command[1].equalsIgnoreCase("OptOut")) {
-		//Be excluded in war by default
-		
-		} else if (command[1].equalsIgnoreCase("Pardon")) {
-		//use by co and higher to remove one attack from a user
-		
-		} else if (command[1].equalsIgnoreCase("help")) {
-			getHelp(e.getChannel());
+			
+			List<WarRunner> clanWars = WarRunner.getRunnersForServer(e.getGuild().getIdLong());
+			int ctr = 0;
+			for (WarRunner wr : clanWars)
+				if (wr.attack(e.getAuthor()))
+					ctr++;
+			
+			e.getChannel().sendMessage("Found you in " + ctr + " clan" + (ctr == 0 ? "s" : ((ctr == 1 ? "" : "s") + ", and marked each one with one attack."))).queue();
+			return;
+			
 		} else {
 			e.getChannel().sendMessage("Didn't understand that. Try using 'war help'").queue();
 		}

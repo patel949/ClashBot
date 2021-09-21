@@ -91,7 +91,7 @@ public class Player extends Command {
 			String alias = split[1];
 			
 			//And now we can put everything in place.
-			ServerData sd = ServerData.getServer("" + e.getGuild().getIdLong());
+			ServerData sd = ServerData.getServer(e.getGuild().getIdLong());
 			sd.addAlias(aliased.getIdLong(), alias);
 		}
 		
@@ -116,7 +116,7 @@ public class Player extends Command {
 			String alias = split[1];
 			
 			//And now we can put everything in place.
-			ServerData sd = ServerData.getServer("" + e.getGuild().getIdLong());
+			ServerData sd = ServerData.getServer(e.getGuild().getIdLong());
 			sd.addAlias(aliased.getIdLong(), alias);
 		}
 		
@@ -127,7 +127,7 @@ public class Player extends Command {
 				//0. determine the target (we allow a self-use of whois)
 				Member target = mlist.isEmpty() ? e.getMember() : mlist.get(0); //use first mentioned player unless none is mentioned, in which case use self.
 				//1. get the server object:
-				ServerData sd = ServerData.getServer("" + e.getGuild().getIdLong());
+				ServerData sd = ServerData.getServer(e.getGuild().getIdLong());
 				
 				//2. get the list of aliases:
 				List<String> aliases = sd.getAlias(target.getIdLong());
@@ -159,7 +159,7 @@ public class Player extends Command {
 			}
 			
 			//get server object
-			ServerData sd = ServerData.getServer("" + e.getGuild().getIdLong());
+			ServerData sd = ServerData.getServer(e.getGuild().getIdLong());
 			
 			//Get list of usernames with this screen name:
 			List<Long> users = sd.getMemberFromAlias(screenName);
