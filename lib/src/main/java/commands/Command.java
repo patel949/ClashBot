@@ -18,8 +18,7 @@ public class Command {
 		if (instance == null)
 			instance = new Command();
 		return instance;
-	}	
-	
+	}
 
 	/*
 	 * Add new commands here
@@ -29,6 +28,7 @@ public class Command {
 			Manage.getInstance(), 
 			Player.getInstance(),
 			War.getInstance(),
+			Help.getInstance(),
 	};
 
 	public static void fillCommandTable(HashMap<String, Command> commands) {

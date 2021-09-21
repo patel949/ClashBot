@@ -4,11 +4,18 @@ plugins {
   id("com.github.johnrengelman.shadow") version "6.0.0"
 }
 
-mainClassName = "com.example.jda.Bot"
+mainClassName = "lib.Main"
 
 version '1.0'
 
 sourceCompatibility = 1.8
+
+jar {
+	manifest {
+		attributes 'Implementation-Title': 'ClashDiscordBot',
+				   'Implementation-Version': version
+	}
+}
 
 repositories {
     mavenCentral()
