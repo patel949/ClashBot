@@ -46,7 +46,7 @@ public class MessageListener extends ListenerAdapter{
 		//When we receive a message, we need to check to see if it starts with our prefix.
 		if (event.getMessage() != null) {
 			String message = event.getMessage().getContentDisplay().toLowerCase();
-			String prefix = ServerData.getServer("" + event.getGuild().getIdLong()).getPrefix();
+			String prefix = ServerData.getServer(event.getGuild().getIdLong()).getPrefix();
 			if (message.startsWith(prefix)) {
 				String[] words = message.substring(prefix.length()).split(" ");
 				String command = words[0];
