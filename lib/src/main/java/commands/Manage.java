@@ -1,6 +1,7 @@
 package commands;
 
 
+import java.util.ArrayList;
 import java.util.List;
 
 import lib.ServerData;
@@ -40,8 +41,10 @@ public class Manage extends Command {
 		
 		if (command[1].equalsIgnoreCase("setChannel")) {
 			List<TextChannel> list = e.getMessage().getMentionedChannels();
-			if (list.size() < 1)
+			if (list.size() < 1) {
+				list = new ArrayList<TextChannel>();
 				list.add(e.getTextChannel());
+			}
 			e.getChannel().sendMessage("Okay! I'll set " + list.get(0).getAsMention() + " to be my default.").queue();
 			ServerData sd = ServerData.getServer(e.getGuild().getIdLong());
 			sd.setDefaultChannel(list.get(0).getIdLong());
@@ -66,9 +69,9 @@ public class Manage extends Command {
 			for (int i = 3; i < command.length; i++)
 				command[2] += " " + command[i];
 ;			if (sd.addClan(command[2])) {
-				e.getChannel().sendMessage("Success! Added new clan.").queue();
+				e.getChannel().sendMessage("Success! Added new clan \"" + command[2] + "\"").queue();
 			} else {
-				e.getChannel().sendMessage("Clan names must be unique, for tagging purposes.").queue();
+				e.getChannel().sendMessage("Clan names must be unique, for tagging purposes. Clan \"" + command[2] + "\" already exists.").queue();
 			}
 		
 		} else if (command[1].equalsIgnoreCase("removeClan")) {
@@ -79,10 +82,10 @@ public class Manage extends Command {
 			ServerData sd = ServerData.getServer(e.getGuild().getIdLong());
 			for (int i = 3; i < command.length; i++)
 				command[2] += " " + command[i];
-			if (sd.addClan(command[2])) {
-				e.getChannel().sendMessage("Success! Removed clan.").queue();
+			if (sd.removeClan(command[2])) {
+				e.getChannel().sendMessage("Success! Removed clan \"" + command[2] + "\".").queue();
 			} else {
-				e.getChannel().sendMessage("Clan not found. Try again?").queue();
+				e.getChannel().sendMessage("Clan \"" + command[2] + "\" not found. Try again?").queue();
 			}
 		} else if (command[1].equalsIgnoreCase("help")) {
 			getHelp(e.getChannel());

@@ -33,10 +33,6 @@ public class War extends Command {
 	
 	@Override
 	public void execute(MessageReceivedEvent e, String[] command) {
-		if (!Command.permissable(e.getMessage().getMember(), userPerms.COLEADER)) {
-			e.getChannel().sendMessage("Sorry chief, you don't have permission to use this command.").queue();
-			return;
-		}
 		if (command.length < 2) {
 			e.getChannel().sendMessage("To see help for the WAR command, use \"war help\"").queue();
 			return;
@@ -62,7 +58,7 @@ public class War extends Command {
 				e.getChannel().sendMessage("Hey! you need to properly use the command - specify an amount of time and the users to remind.").queue();
 				return;
 			}
-			if (!command[2].matches("^\\d(\\d?)[hmsHMS]")) {
+			if (!command[2].matches("^\\d(\\d?)[hmsHMS]$")) {
 				e.getChannel().sendMessage("Usage: WAR REMIND <**h> <**m> <**s> <@user1> ... <@userN>").queue();
 				return;
 			}
@@ -75,7 +71,7 @@ public class War extends Command {
 				currentTime *= 60;
 			timeSecs = currentTime;
 			
-			if (command.length > 3 && command[3].matches("^\\d(\\d?)[hmsHMS]")) {
+			if (command.length > 3 && command[3].matches("^\\d(\\d?)[hmsHMS]$")) {
 				currentTime = Integer.parseInt(command[3].substring(0, command[3].length()-1));
 				type = command[3].charAt(command[3].length()-1);
 				if (type != 'S' && type != 's')
@@ -84,7 +80,7 @@ public class War extends Command {
 					currentTime *= 60;
 				timeSecs += currentTime;
 			}
-			if (command.length > 4 && command[4].matches("^\\d(\\d?)[hmsHMS]")) {
+			if (command.length > 4 && command[4].matches("^\\d(\\d?)[hmsHMS]$")) {
 				currentTime = Integer.parseInt(command[4].substring(0, command[4].length()-1));
 				type = command[4].charAt(command[4].length()-1);
 				if (type != 'S' && type != 's')
@@ -133,9 +129,11 @@ public class War extends Command {
 				if (wr.attack(e.getAuthor()))
 					ctr++;
 			
-			e.getChannel().sendMessage("Found you in " + ctr + " clan" + (ctr == 0 ? "s" : ((ctr == 1 ? "" : "s") + ", and marked each one with one attack."))).queue();
+			e.getChannel().sendMessage("Found you in " + ctr + " clan" + (ctr == 0 ? "s" : (ctr == 1 ? " and noted that you used an attack." : "s, and marked each one with one attack."))).queue();
 			return;
 			
+		} else if (command[1].equalsIgnoreCase("help")) {
+			getHelp(e.getChannel());
 		} else {
 			e.getChannel().sendMessage("Didn't understand that. Try using 'war help'").queue();
 		}
@@ -143,9 +141,7 @@ public class War extends Command {
 	
 	@Override
 	public void getHelp(MessageChannel response) {
-		response.sendMessage("setChannel: set the default channel.\n"
-				+ "setPrefix: set the default prefix.\n"
-				+ "addClan: Add another clan that uses the same discord.\n"
-				+ "removeClan: remove an inactive or abandoned clan.").queue();
+		response.sendMessage("Remind: set a new war-end time to have players reminded 30 and 90 minutes before the end.\n"
+				+ "Attack: use one of two attacks. Once both attacks are used, you will not be reminded for this war.\n").queue();
 	}
 }

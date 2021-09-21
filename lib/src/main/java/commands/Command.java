@@ -28,6 +28,7 @@ public class Command {
 			Command.getInstance(), 
 			Manage.getInstance(), 
 			Player.getInstance(),
+			War.getInstance(),
 	};
 
 	public static void fillCommandTable(HashMap<String, Command> commands) {
@@ -97,7 +98,7 @@ public class Command {
 			return true;
 		if (permissionLevel == userPerms.LEADER)
 			return false;
-		if (highestRole == userPerms.ADMIN)
+		if (member.getRoles().stream().filter(role -> role.getName().equals("Admin")).count() > 0) //Highest role does not try admin.
 			return true;
 		if (permissionLevel == userPerms.ADMIN)
 			return false;
@@ -144,20 +145,50 @@ public class Command {
 		Role addRole = null;
 		Role remRole = null;
 		if (role == userPerms.GUEST) {
+			
+			if (member.getGuild().getRolesByName("Guest", false).size() == 0)
+				member.getGuild().createRole().setName("Guest").complete();
 			remRole = member.getGuild().getRolesByName("Guest"    , false).get(0);
+			
+			if (member.getGuild().getRolesByName("Member", false).size() == 0)
+				member.getGuild().createRole().setName("Member").complete();
 			addRole = member.getGuild().getRolesByName("Member"   , false).get(0);
+		
 		} else if (role == userPerms.MEMBER) {
+			
+			if (member.getGuild().getRolesByName("Member", false).size() == 0)
+				member.getGuild().createRole().setName("Member").complete();
 			remRole = member.getGuild().getRolesByName("Member"   , false).get(0);
+			
+			if (member.getGuild().getRolesByName("Elder", false).size() == 0)
+				member.getGuild().createRole().setName("Elder").complete();
 			addRole = member.getGuild().getRolesByName("Elder"    , false).get(0);
+		
 		} else if (role == userPerms.ELDER) {
+			if (member.getGuild().getRolesByName("Elder", false).size() == 0)
+				member.getGuild().createRole().setName("Elder").complete();
 			remRole = member.getGuild().getRolesByName("Elder"    , false).get(0);
+			
+			if (member.getGuild().getRolesByName("Co-Leader", false).size() == 0)
+				member.getGuild().createRole().setName("Co-Leader").complete();
 			addRole = member.getGuild().getRolesByName("Co-Leader", false).get(0);
+			
 		} else if (role == userPerms.COLEADER) {
+			
+			if (member.getGuild().getRolesByName("Co-Leader", false).size() == 0)
+				member.getGuild().createRole().setName("Co-Leader").complete();
 			remRole = member.getGuild().getRolesByName("Co-Leader", false).get(0);
+			
+			if (member.getGuild().getRolesByName("Leader", false).size() == 0)
+				member.getGuild().createRole().setName("Leader").complete();
 			addRole = member.getGuild().getRolesByName("Leader"   , false).get(0);
+			
 		}
-		member.getGuild().addRoleToMember(member, addRole);
-		member.getGuild().removeRoleFromMember(member, remRole);
+
+		if (addRole != null)
+			member.getGuild().addRoleToMember(member, addRole).complete();
+		if (remRole != null)
+			member.getGuild().removeRoleFromMember(member, remRole).complete();
 	
 	}
 	
@@ -170,20 +201,50 @@ public class Command {
 		Role addRole = null;
 		Role remRole = null;
 		if (role == userPerms.MEMBER) {
+			
+			if (member.getGuild().getRolesByName("Guest", false).size() == 0)
+				member.getGuild().createRole().setName("Guest").complete();
 			addRole = member.getGuild().getRolesByName("Guest"    , false).get(0);
+
+			if (member.getGuild().getRolesByName("Member", false).size() == 0)
+				member.getGuild().createRole().setName("Member").complete();
 			remRole = member.getGuild().getRolesByName("Member"   , false).get(0);
+			
 		} else if (role == userPerms.ELDER) {
+			
+			if (member.getGuild().getRolesByName("Member", false).size() == 0)
+				member.getGuild().createRole().setName("Member").complete();
 			addRole = member.getGuild().getRolesByName("Member"   , false).get(0);
+
+			if (member.getGuild().getRolesByName("Elder", false).size() == 0)
+				member.getGuild().createRole().setName("Elder").complete();
 			remRole = member.getGuild().getRolesByName("Elder"    , false).get(0);
+			
 		} else if (role == userPerms.COLEADER) {
+			
+			if (member.getGuild().getRolesByName("Elder", false).size() == 0)
+				member.getGuild().createRole().setName("Elder").complete();
 			addRole = member.getGuild().getRolesByName("Elder"    , false).get(0);
+
+			if (member.getGuild().getRolesByName("Co-Leader", false).size() == 0)
+				member.getGuild().createRole().setName("Co-Leader").complete();
 			remRole = member.getGuild().getRolesByName("Co-Leader", false).get(0);
+			
 		} else if (role == userPerms.LEADER) {
+			if (member.getGuild().getRolesByName("Co-Leader", false).size() == 0)
+				member.getGuild().createRole().setName("Co-Leader").complete();
 			addRole = member.getGuild().getRolesByName("Co-Leader", false).get(0);
+
+			if (member.getGuild().getRolesByName("Leader", false).size() == 0)
+				member.getGuild().createRole().setName("Leader").complete();
 			remRole = member.getGuild().getRolesByName("Leader"   , false).get(0);
+			
 		}
-		member.getGuild().addRoleToMember(member, addRole);
-		member.getGuild().removeRoleFromMember(member, remRole);
+		
+		if (addRole != null)
+			member.getGuild().addRoleToMember(member, addRole).complete();
+		if (remRole != null)
+			member.getGuild().removeRoleFromMember(member, remRole).complete();
 	
 	}
 	
