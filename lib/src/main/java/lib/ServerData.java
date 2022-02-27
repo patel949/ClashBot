@@ -26,6 +26,7 @@ public class ServerData implements Serializable {
 	/**
 	 * Auto-generated Serial Version.
 	 */
+	private static final HashMap<Long, ServerData> cache = new HashMap<Long, ServerData>();
 	private static final long serialVersionUID = -5430559849286571516L;
 	private static final Object lock = new Object(); //I don't need anything fancy.
 	String prefix = "/";
@@ -51,15 +52,28 @@ public class ServerData implements Serializable {
 	}
 
 	public static ServerData getServer(Long serverID) {
+		ServerData cached = null;
+		synchronized(lock) {
+			cached = cache.get(serverID);
+		}
+		if (cached != null)
+			return cached;
 		String path = "servers\\" + serverID + ".dat";
 		File f = new File(Paths.get(path).toAbsolutePath().toString());
 		if (!f.exists()) {
 			ServerData newServer = new ServerData(path);
 			newServer.setDefaultChannel(Main.getJDA().getGuildById(serverID).getDefaultChannel().getIdLong());
 			newServer.write();
+			synchronized (lock) {
+				cache.put(serverID, newServer);
+			}
 			return newServer;
 		}
-		return read(path);
+		ServerData newServer = read(path);
+		synchronized (lock) {
+			cache.put(serverID, newServer);
+		}
+		return newServer;
 	}
 	
 	public String getWarReminder(int reminderNumber) {
