@@ -1,11 +1,8 @@
-# Ignore Gradle project-specific cache directory
-.gradle
-
-# Ignore Gradle build output directory
-build
-
 #Ignore my API token file.
 Token.*
-
 #Ignore some things specific to my project:
 .settings
+/.gradle/
+lib/src/main/java/lib/Token.java
+*.class
+lib/build/
