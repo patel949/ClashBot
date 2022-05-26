@@ -1,8 +1,10 @@
 #Ignore my API token file.
-Token.*
-#Ignore some things specific to my project:
-.settings
+lib/src/main/java/org/jprojects/lib/Token.java
 /.gradle/
-lib/src/main/java/lib/Token.java
 *.class
 lib/build/
+*.class
+gradlew
+gradle/wrapper/gradle-wrapper.properties
+*.dat
+*.class

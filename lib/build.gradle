@@ -22,10 +22,21 @@ repositories {
     maven {
         name 'm2-dv8tion'
         url 'https://m2.dv8tion.net/releases'
+        
     }
+    maven { 
+    	url 'https://jitpack.io' 
+    	}
 }
 dependencies {
     compile("net.dv8tion:JDA:4.2.1_253")
+    compile("com.auth0:java-jwt:3.19.2")
+    compile("org.apache.httpcomponents:httpclient:4.5.13")
+    compile("com.github.SaHHiiLL:JClash:1.2.3")
+    compile ("com.oracle:ojdbc7:12.1.0.1")  
+    compile("mysql:mysql-connector-java:8.0.11")
+    implementation("com.squareup.okhttp3:okhttp:4.9.3")
+    implementation 'com.google.code.gson:gson:2.8.9'
 }
 
 compileJava.options.encoding = "UTF-8"
