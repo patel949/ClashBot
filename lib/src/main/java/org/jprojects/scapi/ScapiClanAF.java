@@ -4,28 +4,29 @@ import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
+import Core.Enitiy.clan.ClanModel;
 import Core.Enitiy.player.Player;
 import Core.exception.ClashAPIException;
 
-public class ScapiPlayerAF {
-	private ScapiPlayerAF() {
+public class ScapiClanAF {
+	private ScapiClanAF() {
 	}
 	
-	private static ScapiPlayerAF instance = new ScapiPlayerAF();
-	public static ScapiPlayerAF getInstance() {			
+	private static ScapiClanAF instance = new ScapiClanAF();
+	public static ScapiClanAF getInstance() {			
 		return instance;
 	}	
 	
 	//Get player name or NULL if player does not exist
-	public String getPlayerNameFromTag(String playerTag)  {
+	public String getClanNameFromTag(String clanTag)  {
 		//quick fail for simple cases:
-		if( playerTag.length() != 9 
-				||  playerTag.charAt(0) != '#')
+		if( clanTag.length() != 9 
+				||  clanTag.charAt(0) != '#')
 			return null;
 		try {
-			CompletableFuture<Player> future = JClashManager.getJClash().getPlayer(playerTag);
-			Player player = future.get();
-			return player.getName();
+			CompletableFuture<ClanModel> future = JClashManager.getJClash().getClan(clanTag);
+			ClanModel clan = future.get();
+			return clan.getName();
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -45,7 +46,7 @@ public class ScapiPlayerAF {
 	}
 	
 	//close enough for now.
-	public boolean playerExists(String playerTag) {
-		return getPlayerNameFromTag(playerTag) != null;
+	public boolean clanExists(String playerTag) {
+		return getClanNameFromTag(playerTag) != null;
 	}
 }
