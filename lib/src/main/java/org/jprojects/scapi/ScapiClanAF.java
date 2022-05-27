@@ -20,7 +20,7 @@ public class ScapiClanAF {
 	//Get player name or NULL if player does not exist
 	public String getClanNameFromTag(String clanTag)  {
 		//quick fail for simple cases:
-		if( clanTag.length() != 9 
+		if( clanTag.length() < 2 
 				||  clanTag.charAt(0) != '#')
 			return null;
 		try {

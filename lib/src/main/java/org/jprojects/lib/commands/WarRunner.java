@@ -79,7 +79,8 @@ public class WarRunner implements Runnable {
 			//convert IDs to members
 			Set<Member> members = new HashSet<Member>();
 			for (String discordUser : discordUserIds) {
-				Member newMember = guild.getMemberById(discordUser);
+				Member newMember;
+				newMember = guild.retrieveMemberById(discordUser).complete();
 				if (newMember != null)
 					members.add(newMember);
 			}
@@ -91,8 +92,9 @@ public class WarRunner implements Runnable {
 			
 			//send an individual ping to each user
 			for (Member pingMe : members) {
-				c.sendMessage(pingMe.getAsMention() + " " + msgs[ctr++]).queue();
+				c.sendMessage(pingMe.getAsMention() + " " + msgs[ctr]).queue();
 			}
+			ctr++;
 		}
 	}
 	

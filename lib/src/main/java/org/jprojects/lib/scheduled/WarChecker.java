@@ -21,7 +21,7 @@ import org.jprojects.scapi.ScapiWarAF;
 import net.dv8tion.jda.api.entities.MessageChannel;
 
 public class WarChecker extends TimerTask {
-	private final static int FIRST_REMINDER_DELTA = (25 * 60) + 32400; //90 minutes
+	private final static int FIRST_REMINDER_DELTA = 90 * 60; //90 minutes
 	private final static int SECOND_REMINDER_DELTA = 30 * 60; //30 minutes
 	
 	//Map clash's clan ID to last known _end_ time of war.

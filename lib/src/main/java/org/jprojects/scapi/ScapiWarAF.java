@@ -87,12 +87,15 @@ public class ScapiWarAF {
 		try {
 			CompletableFuture<WarInfo> future = JClashManager.getJClash().getCurrentWar(clanTag);
 			WarInfo info = future.get();
+			if (info.getState().equals("notInWar"))
+				return false;
 			Date now = new Date();
 			return (info.getPreparationStartTimeAsDate().before(now) && info.getEndTimeAsDate().after(now));
 			
-		} catch (IOException | InterruptedException | ExecutionException | ParseException e) {
+		} catch (Exception e) {
 			System.out.println("Error getting current war for " + clanTag);
 			e.printStackTrace();
+			System.out.println("rip.");
 			return false;
 		}
 	}
@@ -135,7 +138,7 @@ public class ScapiWarAF {
 			//if before war day or user has not attacked:
 			for (ClanWarMember c : potential) {
 				int attacksPerformed = c.getAttacks() == null ? 0 : c.getAttacks().size();
-				if (info.getStartTimeAsDate().before(now) || attacksPerformed < 2) {
+				if (info.getStartTimeAsDate().after(now) || attacksPerformed < 2) {
 					System.out.println(c.getName() + " has " + (2 - attacksPerformed) + " attacks left. ");
 					userIds.add(c.getTag());
 				} else {
