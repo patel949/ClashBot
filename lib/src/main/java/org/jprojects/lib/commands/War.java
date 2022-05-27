@@ -10,6 +10,7 @@ import org.jprojects.lib.ServerData;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
+//Retired class
 public class War extends Command {
 	
 	private final static int FIRST_REMINDER_DELTA = 90 * 60; //90 minutes
@@ -109,28 +110,12 @@ public class War extends Command {
 			}			
 			
 			//5. Schedule the message.
-			WarRunner runner = new WarRunner(e.getGuild().getIdLong(), mc, new String[] {sd.getWarReminder(1), sd.getWarReminder(2)},e.getMessage().getMentionedUsers());
-			ScheduledExecutorService ses = Executors.newScheduledThreadPool(1);
-			ses.schedule(runner, Math.max(timeSecs-FIRST_REMINDER_DELTA, 1), TimeUnit.SECONDS);
-			ses.schedule(runner, Math.max(timeSecs-SECOND_REMINDER_DELTA,2), TimeUnit.SECONDS);
+			//WarRunner runner = new WarRunner(e.getGuild().getIdLong(), mc, new String[] {sd.getWarReminder(1), sd.getWarReminder(2)},e.getMessage().getMentionedUsers());
+			//ScheduledExecutorService ses = Executors.newScheduledThreadPool(1);
+			//ses.schedule(runner, Math.max(timeSecs-FIRST_REMINDER_DELTA, 1), TimeUnit.SECONDS);
+			//ses.schedule(runner, Math.max(timeSecs-SECOND_REMINDER_DELTA,2), TimeUnit.SECONDS);
 			
 			e.getChannel().sendMessage("Great! I'll remind everyone a couple times before the end of the war!").queue();
-			return;
-			
-		/*
-		 * WAR ATTACK
-		 * $ WAR ATTACK
-		 * Signal that you used an attack in war. if you use two attacks, you don't need to 
-		 */
-		} else if (command[1].equalsIgnoreCase("Attack")) {
-			
-			List<WarRunner> clanWars = WarRunner.getRunnersForServer(e.getGuild().getIdLong());
-			int ctr = 0;
-			for (WarRunner wr : clanWars)
-				if (wr.attack(e.getAuthor()))
-					ctr++;
-			
-			e.getChannel().sendMessage("Found you in " + ctr + " clan" + (ctr == 0 ? "s" : (ctr == 1 ? " and noted that you used an attack." : "s, and marked each one with one attack."))).queue();
 			return;
 			
 		} else if (command[1].equalsIgnoreCase("help")) {

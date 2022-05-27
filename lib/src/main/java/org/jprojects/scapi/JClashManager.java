@@ -18,8 +18,8 @@ private static JClashManager singleton = new JClashManager();
 				e.printStackTrace();
 				System.exit(-1);
 			}
+			System.out.println("JClash initialized successfully.");
 		}
-		System.out.println("JClash initialized successfully.");
 		return clash;
 			
 	}

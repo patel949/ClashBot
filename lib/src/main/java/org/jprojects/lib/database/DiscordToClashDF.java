@@ -9,6 +9,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.jprojects.lib.util.Pair;
+
 public class DiscordToClashDF {
 	
 	private static DiscordToClashDF discordToClashDF = new DiscordToClashDF();
@@ -42,6 +44,8 @@ public class DiscordToClashDF {
 				"INSERT INTO " + DiscordToClashDF.SCHEMA + "." + DiscordToClashDF.TABLE_NAME + " (DISCORD_ID, CLASH_ID, TYPE) VALUES (?,?,?)");
 		queries.put("removeDiscordClashRelationship", 
 				"DELETE FROM " + SCHEMA + "." + DiscordToClashDF.TABLE_NAME + " WHERE DISCORD_ID=? AND CLASH_ID=? AND TYPE=?");
+		queries.put("getIdPairsByType", 
+				"SELECT DISCORD_ID, CLASH_ID FROM " + DiscordToClashDF.SCHEMA + "." + DiscordToClashDF.TABLE_NAME + " a WHERE a.TYPE=?");
 	}
 	
 	public static DiscordToClashDF getDiscordtoClashDF() {
@@ -60,6 +64,7 @@ public class DiscordToClashDF {
 					queries.get((getClash == DiscordToClashDF.GET_CLASH) ? "getClashByDiscord" : "getDiscordByClash"));
 			ps.setString(1, type);
 			ps.setString(2, clashOrDiscordID);
+			ps.execute();
 			ResultSet rs = ps.getResultSet();
 			if (rs.first())
 				while (!rs.isAfterLast()) {
@@ -87,6 +92,26 @@ public class DiscordToClashDF {
 			e.printStackTrace();
 		}
 		return false;
+	}
+	
+	private List<Pair<String, String>> getPairsForType(String type) {
+		List<Pair<String,String>> pairs = new ArrayList<Pair<String,String>>();
+		try {
+			PreparedStatement ps = connection.prepareStatement(
+					queries.get("getIdPairsByType"));
+			ps.setString(1, type);
+			ps.execute();
+			ResultSet rs = ps.getResultSet();
+			if (rs.first())
+				while (!rs.isAfterLast()) {
+					pairs.add(new Pair<String,String>(rs.getString(1),rs.getString(2)));
+					rs.next();
+				}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return pairs;
 	}
 	
 	public List<String> getSubscriptionsByDiscordUser(String discordUser) {
@@ -131,5 +156,9 @@ public class DiscordToClashDF {
 	
 	public boolean removeClanFromDiscordServer(String discordServer, String clan) {
 		return this.addOrRemoveDiscordClashRelationship(discordServer, clan, DiscordToClashDF.SERVER, DiscordToClashDF.REMOVE);
+	}
+	
+	public List<Pair<String, String>> getDiscordClashServerPairs() {
+		return getPairsForType("V");
 	}
 }
