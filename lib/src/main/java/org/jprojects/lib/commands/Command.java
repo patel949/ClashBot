@@ -27,7 +27,6 @@ public class Command {
 			Command.getInstance(), 
 			Manage.getInstance(), 
 			Player.getInstance(),
-			War.getInstance(),
 			Help.getInstance(),
 			Subscribe.getInstance(),
 			Unsubscribe.getInstance(),

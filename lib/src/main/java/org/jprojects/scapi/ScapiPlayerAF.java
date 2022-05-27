@@ -19,7 +19,7 @@ public class ScapiPlayerAF {
 	//Get player name or NULL if player does not exist
 	public String getPlayerNameFromTag(String playerTag)  {
 		//quick fail for simple cases:
-		if( playerTag.length() != 9 
+		if( playerTag.length() < 2 
 				||  playerTag.charAt(0) != '#')
 			return null;
 		try {

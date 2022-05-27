@@ -38,9 +38,14 @@ import org.jprojects.lib.database.DiscordToClashDF;
 
 //Base Facade to connect to 
 public class ScapiWarAF {
+	private ScapiWarAF() {
+	}
 	
-	public static void main(String[] args) {
-    }
+	private static ScapiWarAF instance = new ScapiWarAF();
+	public static ScapiWarAF getInstance() {			
+		return instance;
+	}
+	
 	/*
 	public static void main(String[] args) {
 		new ScapiWarBF().hasNotAttacked("#UYOPRJJR");
@@ -62,6 +67,20 @@ public class ScapiWarAF {
 			e.printStackTrace();
 		}
 		return false;
+	}
+	
+	public String getWarEndTime(String clanTag) {
+		try {
+			CompletableFuture<WarInfo> future = JClashManager.getJClash().getCurrentWar(clanTag);
+			WarInfo info = future.get();
+			Date now = new Date();
+			return info.getEndTime();
+			
+		} catch (IOException | InterruptedException | ExecutionException e) {
+			System.out.println("Error getting current war for " + clanTag);
+			e.printStackTrace();
+			return null;
+		}
 	}
 	
 	public boolean isInWar(String clanTag) {
@@ -130,7 +149,19 @@ public class ScapiWarAF {
 		return userIds;
 	}
 	
-	public int getRemainingWarTimeSeconds() {
-		return -1;
+	public long getRemainingWarTimeSeconds(String clanTag) {
+		try {
+			CompletableFuture<WarInfo> future = JClashManager.getJClash().getCurrentWar(clanTag);
+			WarInfo info = future.get();
+			Date then = info.getEndTimeAsDate();
+			Date now = new Date();
+			long difference = then.getTime() - now.getTime();
+			return difference / 1000;
+			
+		} catch (IOException | InterruptedException | ExecutionException | ParseException e) {
+			System.out.println("Error getting current war for " + clanTag);
+			e.printStackTrace();
+			return -1;
+		}
 	}
 }
