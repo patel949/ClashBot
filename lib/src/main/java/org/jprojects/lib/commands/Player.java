@@ -3,7 +3,7 @@ package org.jprojects.lib.commands;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.jprojects.lib.ServerData;
+import org.jprojects.lib.database.ServerDataDF;
 
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageChannel;
@@ -89,131 +89,6 @@ public class Player extends Command {
 				}
 				
 			}
-		} 
-
-		else if (command[1].equalsIgnoreCase("Alias")) {
-			
-			//We need two things to alias: a Member ID, and an Alias
-			List<Member> mentioned = e.getMessage().getMentionedMembers();
-			
-			//Thing no.1
-			if (mentioned.size() != 1) {
-				e.getChannel().sendMessage("You must mention one discord user followed by one alias.").queue();
-				return;
-			}
-			Member aliased = mentioned.get(0);
-			
-			//Thing no.2
-			String[] split = e.getMessage().getContentDisplay().split(aliased.getEffectiveName());
-			if (split.length != 2) {
-				e.getChannel().sendMessage("You must mention one discord user followed by one alias.").queue();
-				return;
-			}
-			String alias = split[1];
-			
-			//And now we can put everything in place.
-			ServerData sd = ServerData.getServer(e.getGuild().getIdLong());
-			sd.addAlias(aliased.getIdLong(), alias);
-		}
-		
-		else if (command[1].equalsIgnoreCase("DeAlias")) {
-			
-			//We need two things to de-alias: a Member ID, and an Alias
-			List<Member> mentioned = e.getMessage().getMentionedMembers();
-			
-			//Thing no.1
-			if (mentioned.size() != 1) {
-				e.getChannel().sendMessage("You must mention one discord user followed by one alias.").queue();
-				return;
-			}
-			Member aliased = mentioned.get(0);
-			
-			//Thing no.2
-			String[] split = e.getMessage().getContentDisplay().split(aliased.getEffectiveName());
-			if (split.length != 2) {
-				e.getChannel().sendMessage("You must mention one discord user followed by one alias.").queue();
-				return;
-			}
-			String alias = split[1];
-			
-			//And now we can put everything in place.
-			ServerData sd = ServerData.getServer(e.getGuild().getIdLong());
-			sd.addAlias(aliased.getIdLong(), alias);
-		}
-		
-		else if (command[1].equalsIgnoreCase("WhoIs")) {
-			List<Member> mlist = e.getMessage().getMentionedMembers();
-			if (!mlist.isEmpty() || command.length == 2) {
-				
-				//0. determine the target (we allow a self-use of whois)
-				Member target = mlist.isEmpty() ? e.getMember() : mlist.get(0); //use first mentioned player unless none is mentioned, in which case use self.
-				//1. get the server object:
-				ServerData sd = ServerData.getServer(e.getGuild().getIdLong());
-				
-				//2. get the list of aliases:
-				List<String> aliases = sd.getAlias(target.getIdLong());
-				
-				//3. Build list based on returned aliases, in a human-friendly format.
-				StringBuilder output = new StringBuilder(mlist.get(0).getEffectiveName());
-				if (aliases.isEmpty())
-					output.append(" has no registered accounts.");
-				else {
-					output.append(" is also known as ");
-					output.append(aliases.get(0));
-					for (int i = 1; i < aliases.size()-1; i++) {
-						output.append(", ");
-						output.append(aliases.get(i));
-					}
-					if (aliases.size() > 1)
-						output.append(" and " + aliases.get(aliases.size()-1)); //add the last member, assuming there is more than one.
-				}
-				
-				//return result.
-				e.getChannel().sendMessage(output).queue();
-				return;
-			}
-			
-			//get name.
-			String screenName = command[2];
-			if (command[2].equals("-u")) {
-				screenName = command[3];
-			}
-			
-			//get server object
-			ServerData sd = ServerData.getServer(e.getGuild().getIdLong());
-			
-			//Get list of usernames with this screen name:
-			List<Long> users = sd.getMemberFromAlias(screenName);
-			
-			/* Three possibilities:
-			 * 	(A) Exactly one player matches the given description
-			 *  (B) No one matches this in-game name.
-			 *  (C) Multiple players have this in-game name
-			 */
-			
-			//(A)
-			if (users.size() == 1) {
-				e.getChannel().sendMessage(screenName + " is likely " + e.getGuild().getMemberById(users.get(0)).getEffectiveName()).queue();
-				return;
-			}
-			
-			//(b)
-			if (users.size() == 0) {
-				e.getChannel().sendMessage("Unfortunately, " + screenName + " has not yet been paired with any Discord accounts.").queue();
-				return;
-			}
-			
-			//(c)
-			//no if as this is the last catch-all choice.
-			StringBuilder output = new StringBuilder("Multiple discord users have this screen name: " + users.get(0));
-			for (int i = 1; i < users.size() - 1; i++) {
-				output.append(", ");
-				output.append(users.get(i));
-			}
-			output.append(" and "); //yep, no oxford comma!
-			output.append(users.get(users.size()-1));
-			
-			e.getChannel().sendMessage(output).queue();
 		}
 		
 		else if (command[1].equalsIgnoreCase("help")) {
@@ -228,11 +103,6 @@ public class Player extends Command {
 	@Override
 	public void getHelp(MessageChannel response) {
 		response.sendMessage("Promote: promotes the mentioned user(s).\n"
-				+ "Demote: demotes the mentioned user(s).\n"
-				+ "Alias: Adds a known alias to a player.\n"
-				+ "DeAlias: Removes a known alias from a player.\n"
-				+ "WhoIs: Look up a list of aliases for a player, or players for an alias.\n"
-				+ "AddClan: add a new clan to the list of server clans.\n"
-				+ "removeClan: remove an inactive or abandoned clan.").queue();
+				+ "Demote: demotes the mentioned user(s).").queue();
 	}
 }

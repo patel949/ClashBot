@@ -35,17 +35,17 @@ public class DiscordToClashDF {
 		connection = DatabaseConnection.getDatabaseConnection().getConnection();
 		queries = new HashMap<String,String>();
 		queries.put("getClashByDiscord", 
-				"SELECT CLASH_ID FROM " + DiscordToClashDF.SCHEMA + "." + DiscordToClashDF.TABLE_NAME + " a WHERE a.TYPE=? AND DISCORD_ID=?");
+				"SELECT IDEN001_CLASH_ID FROM " + DiscordToClashDF.SCHEMA + "." + DiscordToClashDF.TABLE_NAME + " a WHERE a.IDEN001_TYPE=? AND IDEN001_DISCORD_ID=?");
 		queries.put("getClashByDiscord", 
-				"SELECT DISCORD_ID FROM " + DiscordToClashDF.SCHEMA + "." + DiscordToClashDF.TABLE_NAME + " a WHERE a.TYPE=? AND CLASH_ID=?");
+				"SELECT IDEN001_DISCORD_ID FROM " + DiscordToClashDF.SCHEMA + "." + DiscordToClashDF.TABLE_NAME + " a WHERE a.IDEN001_TYPE=? AND IDEN001_CLASH_ID=?");
 		queries.put("getDiscordByClash",
-				"SELECT DISCORD_ID FROM " + DiscordToClashDF.SCHEMA + "." + DiscordToClashDF.TABLE_NAME + " a WHERE a.TYPE IN (?) AND CLASH_ID=?");
+				"SELECT IDEN001_DISCORD_ID FROM " + DiscordToClashDF.SCHEMA + "." + DiscordToClashDF.TABLE_NAME + " a WHERE a.IDEN001_TYPE IN (?) AND IDEN001_CLASH_ID=?");
 		queries.put("addDiscordClashRelationship",
-				"INSERT INTO " + DiscordToClashDF.SCHEMA + "." + DiscordToClashDF.TABLE_NAME + " (DISCORD_ID, CLASH_ID, TYPE) VALUES (?,?,?)");
+				"INSERT INTO " + DiscordToClashDF.SCHEMA + "." + DiscordToClashDF.TABLE_NAME + " (IDEN001_DISCORD_ID, IDEN001_CLASH_ID, IDEN001_TYPE) VALUES (?,?,?)");
 		queries.put("removeDiscordClashRelationship", 
-				"DELETE FROM " + SCHEMA + "." + DiscordToClashDF.TABLE_NAME + " WHERE DISCORD_ID=? AND CLASH_ID=? AND TYPE=?");
+				"DELETE FROM " + SCHEMA + "." + DiscordToClashDF.TABLE_NAME + " WHERE IDEN001_DISCORD_ID=? AND IDEN001_CLASH_ID=? AND IDEN001_TYPE=?");
 		queries.put("getIdPairsByType", 
-				"SELECT DISCORD_ID, CLASH_ID FROM " + DiscordToClashDF.SCHEMA + "." + DiscordToClashDF.TABLE_NAME + " a WHERE a.TYPE=?");
+				"SELECT IDEN001_DISCORD_ID, IDEN001_CLASH_ID FROM " + DiscordToClashDF.SCHEMA + "." + DiscordToClashDF.TABLE_NAME + " a WHERE a.IDEN001_TYPE=?");
 	}
 	
 	public static DiscordToClashDF getDiscordtoClashDF() {
