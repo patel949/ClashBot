@@ -4,6 +4,7 @@ package org.jprojects.lib;
 import java.util.HashMap;
 
 import org.jprojects.lib.commands.Command;
+import org.jprojects.lib.database.ServerDataDF;
 
 /*
 import net.dv8tion.jda.api.JDA;
@@ -46,7 +47,7 @@ public class MessageListener extends ListenerAdapter{
 		//When we receive a message, we need to check to see if it starts with our prefix.
 		if (event.getMessage() != null) {
 			String message = event.getMessage().getContentDisplay().toLowerCase();
-			String prefix = ServerData.getServer(event.getGuild().getIdLong()).getPrefix();
+			String prefix = ServerDataDF.getServer(event.getGuild().getId()).getPrefix();
 			if (message.startsWith(prefix)) {
 				String[] words = message.substring(prefix.length()).split(" ");
 				String command = words[0];

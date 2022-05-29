@@ -4,7 +4,6 @@ package org.jprojects.lib.commands;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.jprojects.lib.ServerData;
 import org.jprojects.lib.commands.Command.userPerms;
 import org.jprojects.lib.database.DiscordToClashDF;
 import org.jprojects.scapi.ScapiClanAF;

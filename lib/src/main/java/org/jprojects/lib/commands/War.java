@@ -5,7 +5,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import org.jprojects.lib.ServerData;
+import org.jprojects.lib.database.ServerDataDF;
 
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
@@ -99,7 +99,7 @@ public class War extends Command {
 			}
 			
 			//4. craft a message.
-			ServerData sd = ServerData.getServer(e.getGuild().getIdLong());
+			ServerDataDF sd = ServerDataDF.getServer(e.getGuild().getId());
 			
 			MessageChannel mc = null;
 			if (sd.getDefaultChannel() == 0) {

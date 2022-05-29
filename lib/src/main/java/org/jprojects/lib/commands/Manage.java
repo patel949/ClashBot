@@ -4,7 +4,7 @@ package org.jprojects.lib.commands;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.jprojects.lib.ServerData;
+import org.jprojects.lib.database.ServerDataDF;
 
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.TextChannel;
@@ -47,47 +47,20 @@ public class Manage extends Command {
 				list.add(e.getTextChannel());
 			}
 			e.getChannel().sendMessage("Okay! I'll set " + list.get(0).getAsMention() + " to be my default.").queue();
-			ServerData sd = ServerData.getServer(e.getGuild().getIdLong());
-			sd.setDefaultChannel(list.get(0).getIdLong());
+			ServerDataDF sd = ServerDataDF.getServer(e.getGuild().getId());
+			sd.setDefaultChannel(list.get(0).getId());
 		
 		} else if (command[1].equalsIgnoreCase("setPrefix")) {
 			if (command.length < 3) {
 				e.getChannel().sendMessage("You've got to specify a prefix.").queue();
 				return;
 			}
-			ServerData sd = ServerData.getServer(e.getGuild().getIdLong());
+			ServerDataDF sd = ServerDataDF.getServer(e.getGuild().getId());
 			for (int i = 3; i < command.length; i++)
 				command[2] += " " + command[i]; //If I thought this was going to be a common command I might consider a stringbuilder.
 			sd.setPrefix(command[2]);
 			e.getChannel().sendMessage("Okay, consider it done!").queue();
 			
-		} else if (command[1].equalsIgnoreCase("addClan")) {
-			if (command.length < 3) {
-				e.getChannel().sendMessage("You've got to specify a clan name.").queue();
-				return;
-			}
-			ServerData sd = ServerData.getServer(e.getGuild().getIdLong());
-			for (int i = 3; i < command.length; i++)
-				command[2] += " " + command[i];
-;			if (sd.addClan(command[2])) {
-				e.getChannel().sendMessage("Success! Added new clan \"" + command[2] + "\"").queue();
-			} else {
-				e.getChannel().sendMessage("Clan names must be unique, for tagging purposes. Clan \"" + command[2] + "\" already exists.").queue();
-			}
-		
-		} else if (command[1].equalsIgnoreCase("removeClan")) {
-			if (command.length < 3) {
-				e.getChannel().sendMessage("You've got to specify a one-word prefix.").queue();
-				return;
-			}
-			ServerData sd = ServerData.getServer(e.getGuild().getIdLong());
-			for (int i = 3; i < command.length; i++)
-				command[2] += " " + command[i];
-			if (sd.removeClan(command[2])) {
-				e.getChannel().sendMessage("Success! Removed clan \"" + command[2] + "\".").queue();
-			} else {
-				e.getChannel().sendMessage("Clan \"" + command[2] + "\" not found. Try again?").queue();
-			}
 		} else if (command[1].equalsIgnoreCase("help")) {
 			getHelp(e.getChannel());
 		} else {
@@ -98,8 +71,6 @@ public class Manage extends Command {
 	@Override
 	public void getHelp(MessageChannel response) {
 		response.sendMessage("setChannel: set the default channel.\n"
-				+ "setPrefix: set the default prefix.\n"
-				+ "addClan: Add another clan that uses the same discord.\n"
-				+ "removeClan: remove an inactive or abandoned clan.").queue();
+				+ "setPrefix: set the default prefix.").queue();
 	}
 }

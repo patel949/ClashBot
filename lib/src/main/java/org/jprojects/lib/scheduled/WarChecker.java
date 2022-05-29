@@ -12,9 +12,9 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import org.jprojects.lib.ServerData;
 import org.jprojects.lib.commands.WarRunner;
 import org.jprojects.lib.database.DiscordToClashDF;
+import org.jprojects.lib.database.ServerDataDF;
 import org.jprojects.lib.util.Pair;
 import org.jprojects.scapi.ScapiWarAF;
 
@@ -62,7 +62,7 @@ public class WarChecker extends TimerTask {
 				}
 				//4. craft a message.
 				for (String server : discordServers) {
-					ServerData sd = ServerData.getServer(Long.parseLong(server));
+					ServerDataDF sd = ServerDataDF.getServer(server);
 						
 					
 					//5. Schedule the message.
