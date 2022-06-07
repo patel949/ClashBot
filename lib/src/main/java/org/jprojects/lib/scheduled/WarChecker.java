@@ -43,7 +43,7 @@ public class WarChecker extends TimerTask {
 		
 		//For each ID, 
 		for (String clanId : clanIds) {
-			System.out.println("Checking " + clanId + "... ");
+			System.out.println("[WarCheckerThread] Checking " + clanId + "... ");
 			//check if there is an ongoing war.
 			if (ScapiWarAF.getInstance().isInWar(clanId)) {
 				//if in a war state, see if we know about the end date.
@@ -66,7 +66,7 @@ public class WarChecker extends TimerTask {
 						
 					
 					//5. Schedule the message.
-					System.out.println(" * Creating a WarRunner to run first in " + Math.max(timeSecs-FIRST_REMINDER_DELTA, 1) + " and then " + Math.max(timeSecs-SECOND_REMINDER_DELTA,2) + " seconds.");
+					System.out.println("[WarCheckerThread] * Creating a WarRunner to run first in " + Math.max(timeSecs-FIRST_REMINDER_DELTA, 1) + " and then " + Math.max(timeSecs-SECOND_REMINDER_DELTA,2) + " seconds.");
 					WarRunner runner = new WarRunner(Long.parseLong(server), clanId, sd.getDefaultChannel(), new String[] {sd.getWarReminder(1), sd.getWarReminder(2)});
 					ScheduledExecutorService ses = Executors.newScheduledThreadPool(1);
 					ses.schedule(runner, Math.max(timeSecs-FIRST_REMINDER_DELTA, 1), TimeUnit.SECONDS);
