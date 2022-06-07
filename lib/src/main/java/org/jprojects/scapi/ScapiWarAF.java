@@ -42,10 +42,22 @@ public class ScapiWarAF {
 	}
 	
 	private static ScapiWarAF instance = new ScapiWarAF();
+	private static List<String> NOT_IN_WAR;
 	public static ScapiWarAF getInstance() {			
 		return instance;
 	}
-	
+	static {
+		//guesses because the api documentation is not right.
+		NOT_IN_WAR = new ArrayList<String>();
+		NOT_IN_WAR.add("warEnded");
+		NOT_IN_WAR.add("notInWar");
+		NOT_IN_WAR.add("inMatchmaking");
+		NOT_IN_WAR.add("clanNotFound");
+		NOT_IN_WAR.add("accessDenied");
+		NOT_IN_WAR.add("enterWar");
+		NOT_IN_WAR.add("matched");
+		
+	}
 	/*
 	public static void main(String[] args) {
 		new ScapiWarBF().hasNotAttacked("#UYOPRJJR");
@@ -134,6 +146,8 @@ public class ScapiWarAF {
 			Date now = new Date(); //before we call the future.
 			CompletableFuture<WarInfo> future = JClashManager.getJClash().getCurrentWar(clanTag);
 			WarInfo info = future.get();
+			if (ScapiWarAF.NOT_IN_WAR.contains(info.getState()))
+				return userIds;
 			List<ClanWarMember> potential = info.getClan().getWarMembers();
 			//if before war day or user has not attacked:
 			for (ClanWarMember c : potential) {

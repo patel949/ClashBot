@@ -30,6 +30,7 @@ public class Command {
 			Help.getInstance(),
 			Subscribe.getInstance(),
 			Unsubscribe.getInstance(),
+			War.getInstance(),
 	};
 
 	public static void fillCommandTable(HashMap<String, Command> commands) {

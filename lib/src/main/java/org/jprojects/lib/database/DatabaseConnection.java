@@ -26,7 +26,7 @@ public class DatabaseConnection {
  
         try {
             // connect way #1
-            String url1 = "jdbc:mysql://localhost:3306/?useSSL=false";
+            String url1 = "jdbc:mysql://localhost:3306/";
             String user = Token.getDBUsername();
             String password = Token.getDBPassword();
  
@@ -37,7 +37,7 @@ public class DatabaseConnection {
             }
  
         } catch (SQLException ex) {
-            System.out.println("An error occurred.");
+            System.out.println("An error occurred while attempting to connect to the database:");
             ex.printStackTrace();
         }
 	}
