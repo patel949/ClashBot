@@ -12,16 +12,12 @@ import java.util.Map;
 import org.jprojects.lib.Main;
 
 public class ServerDataDF {
-	private static Connection connection;
 	private static Map<String, String> queries;
 	
 	private static final String SCHEMA = "identify";
 	private static final String TABLE_NAME = "iden003_discord_server_data";
-	private static boolean isInit = false;
 	
 	static {
-		isInit = true;
-		connection = DatabaseConnection.getDatabaseConnection().getConnection();
 		queries = new HashMap<String,String>();
 		queries.put("getServerDataByID", 
 				"SELECT * FROM " + ServerDataDF.SCHEMA + "." + ServerDataDF.TABLE_NAME + " a WHERE IDEN001_DISCORD_ID=?");
@@ -84,12 +80,15 @@ public class ServerDataDF {
 	
 	//TODO from here on.
 	private static ServerDataDF read(String serverID) {
-		PreparedStatement ps;
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		Connection connection = null;
 		try {
+			connection = DatabaseConnectionPool.getDatabaseConnectionPool().getConnection();
 			ps = connection.prepareStatement(queries.get("getServerDataByID"));
 			ps.setString(1, serverID);
 			ps.execute();
-			ResultSet rs = ps.getResultSet();
+			rs = ps.getResultSet();
 			if (!rs.first()) {
 				System.out.println("No server found in database.");
 				return null;
@@ -100,11 +99,34 @@ public class ServerDataDF {
 			sd.defaultChannel = rs.getString(3);
 			sd.warMessage1 = rs.getString(4);
 			sd.warMessage2 = rs.getString(5);
-			
+			rs.close();
+			connection.close();
 			return sd;
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		} finally {
+			if (rs != null)
+				try {
+					rs.close();
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			if (ps != null)
+				try {
+					ps.close();
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			if (connection != null)
+				try {
+					connection.close();
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 		}
 		return null;
 	}
@@ -137,8 +159,10 @@ public class ServerDataDF {
 			sb.setLength(sb.length()-1);
 		
 		sb.append(" WHERE IDEN001_DISCORD_ID=?");
-		PreparedStatement ps;
+		PreparedStatement ps = null;
+		Connection connection = null;
 		try {
+			connection = DatabaseConnectionPool.getDatabaseConnectionPool().getConnection();
 			ps = connection.prepareStatement(sb.toString());
 			
 			for (int i = 0; i < changed.size(); i++) {
@@ -150,13 +174,31 @@ public class ServerDataDF {
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		} finally {
+			if (ps != null)
+				try {
+					ps.close();
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			if (connection != null)
+				try {
+					connection.close();
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 		}
 		return false;
 	}
 	
 	private boolean writeNew() {
+		Connection connection = null;
+		PreparedStatement ps = null;
 		try {
-			PreparedStatement ps = connection.prepareStatement(queries.get("addNewServerDataToDatabase"));
+			connection = DatabaseConnectionPool.getDatabaseConnectionPool().getConnection();
+			ps = connection.prepareStatement(queries.get("addNewServerDataToDatabase"));
 			ps.setString(1, serverID);
 			ps.setString(2, prefix);
 			ps.setString(3, defaultChannel);
@@ -168,6 +210,21 @@ public class ServerDataDF {
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		} finally {
+			if (ps != null)
+				try {
+					ps.close();
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			if (connection != null)
+				try {
+					connection.close();
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 		}
 		return false;
 	}
