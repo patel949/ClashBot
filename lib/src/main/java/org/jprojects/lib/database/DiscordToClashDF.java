@@ -15,7 +15,6 @@ public class DiscordToClashDF {
 	
 	private static DiscordToClashDF discordToClashDF = new DiscordToClashDF();
 	
-	private Connection connection;
 	private Map<String, String> queries;
 	
 	
@@ -32,7 +31,6 @@ public class DiscordToClashDF {
 	private static final String TABLE_NAME = "iden001_discord_to_clash";
 	
 	private DiscordToClashDF() {
-		connection = DatabaseConnection.getDatabaseConnection().getConnection();
 		queries = new HashMap<String,String>();
 		queries.put("getClashByDiscord", 
 				"SELECT IDEN001_CLASH_ID FROM " + DiscordToClashDF.SCHEMA + "." + DiscordToClashDF.TABLE_NAME + " a WHERE a.IDEN001_TYPE=? AND IDEN001_DISCORD_ID=?");
@@ -61,13 +59,17 @@ public class DiscordToClashDF {
 	 */
 	private List<String> getClashOrDiscord(String clashOrDiscordID, String type, boolean getClash) {
 		List<String> accounts = new ArrayList<String>();
+		PreparedStatement ps = null;
+		Connection connection = null;
+		ResultSet rs = null;
 		try {
-			PreparedStatement ps = connection.prepareStatement(
+			connection = DatabaseConnectionPool.getDatabaseConnectionPool().getConnection();
+			ps = connection.prepareStatement(
 					queries.get((getClash == DiscordToClashDF.GET_CLASH) ? "getClashByDiscord" : "getDiscordByClash"));
 			ps.setString(1, type);
 			ps.setString(2, clashOrDiscordID);
 			ps.execute();
-			ResultSet rs = ps.getResultSet();
+			rs = ps.getResultSet();
 			if (rs.first())
 				while (!rs.isAfterLast()) {
 					accounts.add(rs.getString(1));
@@ -76,13 +78,38 @@ public class DiscordToClashDF {
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		}finally {
+			if (rs != null)
+				try {
+					rs.close();
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			if (ps != null)
+				try {
+					ps.close();
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			if (connection != null)
+				try {
+					connection.close();
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 		}
 		return accounts;
 	}
 	
 	private boolean addOrRemoveDiscordClashRelationship(String discordUser, String clashId, String type, boolean add) {
+		Connection connection = null;
+		PreparedStatement ps = null;
 		try {
-			PreparedStatement ps = connection.prepareStatement(
+			connection = DatabaseConnectionPool.getDatabaseConnectionPool().getConnection();
+			ps = connection.prepareStatement(
 					queries.get((add == DiscordToClashDF.ADD ? "add" : "remove") + "DiscordClashRelationship"));
 			ps.setString(1, discordUser);
 			ps.setString(2, clashId);
@@ -92,18 +119,38 @@ public class DiscordToClashDF {
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		} finally {
+			if (ps != null)
+				try {
+					ps.close();
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			if (connection != null)
+				try {
+					connection.close();
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 		}
 		return false;
 	}
 	
 	private List<Pair<String, String>> getPairsForType(String type) {
 		List<Pair<String,String>> pairs = new ArrayList<Pair<String,String>>();
+		Connection connection = null;
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		
 		try {
-			PreparedStatement ps = connection.prepareStatement(
+			connection = DatabaseConnectionPool.getDatabaseConnectionPool().getConnection();
+			ps = connection.prepareStatement(
 					queries.get("getIdPairsByType"));
 			ps.setString(1, type);
 			ps.execute();
-			ResultSet rs = ps.getResultSet();
+			rs = ps.getResultSet();
 			if (rs.first())
 				while (!rs.isAfterLast()) {
 					pairs.add(new Pair<String,String>(rs.getString(1),rs.getString(2)));
@@ -112,13 +159,38 @@ public class DiscordToClashDF {
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		} finally {
+			if (rs != null)
+				try {
+					rs.close();
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			if (ps != null)
+				try {
+					ps.close();
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			if (connection != null)
+				try {
+					connection.close();
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 		}
 		return pairs;
 	}
 	
 	private boolean recordExists(String discordID, String clashID, String type) {
+		PreparedStatement ps = null;
+		Connection connection = null;
 		try {
-			PreparedStatement ps = connection.prepareStatement(
+			connection = DatabaseConnectionPool.getDatabaseConnectionPool().getConnection();
+			ps = connection.prepareStatement(
 					queries.get("checkIfRelationshipExists"));
 			ps.setString(1, discordID);
 			ps.setString(2, clashID);
@@ -128,6 +200,21 @@ public class DiscordToClashDF {
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		} finally {
+			if (ps != null)
+				try {
+					ps.close();
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			if (connection != null)
+				try {
+					connection.close();
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 		}
 		return false;
 	}
