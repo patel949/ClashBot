@@ -6,8 +6,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.jprojects.lib.util.Pair;
 
@@ -27,118 +29,34 @@ public class DiscordToClashDF {
 	private static final String OWNER = "O";
 	private static final String SERVER = "V";
 	
+	public static final int SQL_OK = 0;
+	public static final int SQL_FAILED_RECORD_EXISTS = 1;
+	public static final int SQL_FAILED_NOT_FOUND = 2;
+	public static final int SQL_FAILED_SQL_EXCEPTION = 3;
+	
 	private static final String SCHEMA = "identify";
 	private static final String TABLE_NAME = "iden001_discord_to_clash";
 	
 	private DiscordToClashDF() {
 		queries = new HashMap<String,String>();
-		queries.put("getClashByDiscord", 
-				"SELECT IDEN001_CLASH_ID FROM " + DiscordToClashDF.SCHEMA + "." + DiscordToClashDF.TABLE_NAME + " a WHERE a.IDEN001_TYPE=? AND IDEN001_DISCORD_ID=?");
-		queries.put("getDiscordByClash", 
-				"SELECT IDEN001_DISCORD_ID FROM " + DiscordToClashDF.SCHEMA + "." + DiscordToClashDF.TABLE_NAME + " a WHERE a.IDEN001_TYPE=? AND IDEN001_CLASH_ID=?");
-		queries.put("getDiscordByClashMultiType",
-				"SELECT IDEN001_DISCORD_ID FROM " + DiscordToClashDF.SCHEMA + "." + DiscordToClashDF.TABLE_NAME + " a WHERE a.IDEN001_TYPE IN (?) AND IDEN001_CLASH_ID=?");
-		queries.put("addDiscordClashRelationship",
-				"INSERT INTO " + DiscordToClashDF.SCHEMA + "." + DiscordToClashDF.TABLE_NAME + " (IDEN001_DISCORD_ID, IDEN001_CLASH_ID, IDEN001_TYPE) VALUES (?,?,?)");
-		queries.put("removeDiscordClashRelationship", 
-				"DELETE FROM " + SCHEMA + "." + DiscordToClashDF.TABLE_NAME + " WHERE IDEN001_DISCORD_ID=? AND IDEN001_CLASH_ID=? AND IDEN001_TYPE=?");
 		queries.put("getIdPairsByType", 
-				"SELECT IDEN001_DISCORD_ID, IDEN001_CLASH_ID FROM " + DiscordToClashDF.SCHEMA + "." + DiscordToClashDF.TABLE_NAME + " a WHERE a.IDEN001_TYPE=?");
-		queries.put("checkIfRelationshipExists",
-				"SELECT * FROM " + DiscordToClashDF.SCHEMA + "." + DiscordToClashDF.TABLE_NAME + " WHERE IDEN001_DISCORD_ID=? AND IDEN001_CLASH_ID=? AND IDEN001_TYPE=?");
+				"SELECT IDEN001_DISCORD_ID, IDEN001_CLASH_ID FROM " + DiscordToClashDF.SCHEMA + "." + DiscordToClashDF.TABLE_NAME + " WHERE IDEN001_TYPE='" + DiscordToClashDF.SERVER + "'");
+		queries.put("getUsersSubscriptionsOnServer", 
+				"SELECT IDEN001_CLASH_ID FROM " + DiscordToClashDF.SCHEMA + "." + DiscordToClashDF.TABLE_NAME + " WHERE IDEN001_TYPE='" + DiscordToClashDF.SUBSCRIBER + "' AND IDEN001_DISCORD_USR_ID=? AND IDEN001_DISCORD_ID=?");
+		queries.put("getUsersSubscriptionsOwnsOnServer", 
+				"SELECT IDEN001_DISCORD_USR_ID FROM " + DiscordToClashDF.SCHEMA + "." + DiscordToClashDF.TABLE_NAME + " WHERE IDEN001_TYPE=? AND IDEN001_CLASH_ID=? AND IDEN001_DISCORD_ID=?");
+		queries.put("getClashByDiscord", 
+				"SELECT IDEN001_CLASH_ID FROM " + DiscordToClashDF.SCHEMA + "." + DiscordToClashDF.TABLE_NAME + " WHERE IDEN001_TYPE='"+DiscordToClashDF.SERVER+"' AND IDEN001_DISCORD_ID=?");
+		queries.put("getDiscordByClash", 
+				"SELECT IDEN001_DISCORD_ID FROM " + DiscordToClashDF.SCHEMA + "." + DiscordToClashDF.TABLE_NAME + " WHERE IDEN001_TYPE='"+DiscordToClashDF.SERVER+"' AND IDEN001_CLASH_ID=?");
+		queries.put("getMonitoredClans",
+				"SELECT IDEN001_CLASH_ID FROM " + DiscordToClashDF.SCHEMA + "." + DiscordToClashDF.TABLE_NAME + " where IDEN001_TYPE=" + DiscordToClashDF.SERVER);
+		queries.put("checkIfRecordExists",
+				"SELECT * FROM " + DiscordToClashDF.SCHEMA + "." + DiscordToClashDF.TABLE_NAME + " WHERE IDEN001_DISCORD_ID=? AND IDEN001_DISCORD_USR_ID=? AND IDEN001_CLASH_ID=? AND IDEN001_TYPE=?");
+	
 	}
 	
-	public static DiscordToClashDF getDiscordtoClashDF() {
-		return discordToClashDF;
-	}
-	
-	/*
-	 * Gets clash id by discord id or discord id by clash id.
-	 * All found matches will be returned in a list. 
-	 * In the case of no matches, an empty list will be returned.
-	 */
-	private List<String> getClashOrDiscord(String clashOrDiscordID, String type, boolean getClash) {
-		List<String> accounts = new ArrayList<String>();
-		PreparedStatement ps = null;
-		Connection connection = null;
-		ResultSet rs = null;
-		try {
-			connection = DatabaseConnectionPool.getDatabaseConnectionPool().getConnection();
-			ps = connection.prepareStatement(
-					queries.get((getClash == DiscordToClashDF.GET_CLASH) ? "getClashByDiscord" : "getDiscordByClash"));
-			ps.setString(1, type);
-			ps.setString(2, clashOrDiscordID);
-			ps.execute();
-			rs = ps.getResultSet();
-			if (rs.first())
-				while (!rs.isAfterLast()) {
-					accounts.add(rs.getString(1));
-					rs.next();
-				}
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}finally {
-			if (rs != null)
-				try {
-					rs.close();
-				} catch (SQLException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			if (ps != null)
-				try {
-					ps.close();
-				} catch (SQLException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			if (connection != null)
-				try {
-					connection.close();
-				} catch (SQLException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-		}
-		return accounts;
-	}
-	
-	private boolean addOrRemoveDiscordClashRelationship(String discordUser, String clashId, String type, boolean add) {
-		Connection connection = null;
-		PreparedStatement ps = null;
-		try {
-			connection = DatabaseConnectionPool.getDatabaseConnectionPool().getConnection();
-			ps = connection.prepareStatement(
-					queries.get((add == DiscordToClashDF.ADD ? "add" : "remove") + "DiscordClashRelationship"));
-			ps.setString(1, discordUser);
-			ps.setString(2, clashId);
-			ps.setString(3, type);
-			int row = ps.executeUpdate();
-			return row != 0;
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} finally {
-			if (ps != null)
-				try {
-					ps.close();
-				} catch (SQLException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			if (connection != null)
-				try {
-					connection.close();
-				} catch (SQLException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-		}
-		return false;
-	}
-	
-	private List<Pair<String, String>> getPairsForType(String type) {
+	public List<Pair<String, String>> getDiscordClashServerPairs() {
 		List<Pair<String,String>> pairs = new ArrayList<Pair<String,String>>();
 		Connection connection = null;
 		PreparedStatement ps = null;
@@ -148,7 +66,6 @@ public class DiscordToClashDF {
 			connection = DatabaseConnectionPool.getDatabaseConnectionPool().getConnection();
 			ps = connection.prepareStatement(
 					queries.get("getIdPairsByType"));
-			ps.setString(1, type);
 			ps.execute();
 			rs = ps.getResultSet();
 			if (rs.first())
@@ -185,18 +102,79 @@ public class DiscordToClashDF {
 		return pairs;
 	}
 	
-	private boolean recordExists(String discordID, String clashID, String type) {
+	public Set<String> getAllMonitoredClans() {
+		Set<String> clans = new HashSet<String>();
+		Connection connection = null;
 		PreparedStatement ps = null;
+		ResultSet rs = null;
+		
+		try {
+			connection = DatabaseConnectionPool.getDatabaseConnectionPool().getConnection();
+			ps = connection.prepareStatement(
+					queries.get("getMonitoredClans"));
+			ps.execute();
+			rs = ps.getResultSet();
+			if (rs.first())
+				while (!rs.isAfterLast()) {
+					clans.add(rs.getString(1));
+					rs.next();
+				}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} finally {
+			if (rs != null)
+				try {
+					rs.close();
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			if (ps != null)
+				try {
+					ps.close();
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			if (connection != null)
+				try {
+					connection.close();
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+		}
+		return clans;
+	}
+	
+	public List<String> getUsersOwnedAccounts(String userDiscordID) {
+		return getUsersSubscriptionsOwnsOnServer(userDiscordID, "0",DiscordToClashDF.OWNER);
+	}
+	
+	public List<String> getUsersSubscriptionsOnServer(String userDiscordID, String serverDiscordID) {
+		return getUsersSubscriptionsOwnsOnServer(userDiscordID, serverDiscordID, DiscordToClashDF.SUBSCRIBER);
+	}
+	
+	private List<String> getUsersSubscriptionsOwnsOnServer(String userDiscordID, String serverDiscordID, String type) {
+		List<String> accounts = new ArrayList<String>();
+		PreparedStatement ps = null;
+		ResultSet rs = null;
 		Connection connection = null;
 		try {
 			connection = DatabaseConnectionPool.getDatabaseConnectionPool().getConnection();
 			ps = connection.prepareStatement(
-					queries.get("checkIfRelationshipExists"));
-			ps.setString(1, discordID);
-			ps.setString(2, clashID);
-			ps.setString(3, type);
+					queries.get("getUsersSubscriptionsOwnsOnServer"));
+			ps.setString(1, type);
+			ps.setString(2, userDiscordID);
+			ps.setString(3, serverDiscordID);
 			ps.execute();
-			return ps.getResultSet().first();
+			rs = ps.getResultSet();
+			if (rs.first())
+				while (!rs.isAfterLast()) {
+					accounts.add(rs.getString(1));
+					rs.next();
+				}
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -216,66 +194,240 @@ public class DiscordToClashDF {
 					e.printStackTrace();
 				}
 		}
-		return false;
+		return accounts;
 	}
 	
-	public boolean serverRelationshipExists(String discordID, String clashID) {
-		return recordExists(discordID, clashID, DiscordToClashDF.SERVER);
+	public List<String> getUsersSubscribedToClashAccountOnServer(String clashID, String serverDiscordID) {
+		List<String> accounts = new ArrayList<String>();
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		Connection connection = null;
+		try {
+			connection = DatabaseConnectionPool.getDatabaseConnectionPool().getConnection();
+			ps = connection.prepareStatement(
+					queries.get("getUsersSubscribedToClashAccountOnServer"));
+			ps.setString(1, clashID);
+			ps.setString(2, serverDiscordID);
+			ps.execute();
+			rs = ps.getResultSet();
+			if (rs.first())
+				while (!rs.isAfterLast()) {
+					accounts.add(rs.getString(1));
+					rs.next();
+				}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} finally {
+			if (ps != null)
+				try {
+					ps.close();
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			if (connection != null)
+				try {
+					connection.close();
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+		}
+		return accounts;
 	}
 	
-	public boolean subscriberRelationshipExists(String discordID, String clashID) {
-		return recordExists(discordID, clashID, DiscordToClashDF.SUBSCRIBER);
+	private List<String> getClashOrDiscord(String clashOrDiscordID, boolean getClash) {
+		List<String> accounts = new ArrayList<String>();
+		PreparedStatement ps = null;
+		Connection connection = null;
+		ResultSet rs = null;
+		try {
+			connection = DatabaseConnectionPool.getDatabaseConnectionPool().getConnection();
+			ps = connection.prepareStatement(
+					queries.get((getClash == DiscordToClashDF.GET_CLASH) ? "getClashByDiscord" : "getDiscordByClash"));
+			ps.setString(1, clashOrDiscordID);
+			ps.execute();
+			rs = ps.getResultSet();
+			if (rs.first())
+				while (!rs.isAfterLast()) {
+					accounts.add(rs.getString(1));
+					rs.next();
+				}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}finally {
+			if (rs != null)
+				try {
+					rs.close();
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			if (ps != null)
+				try {
+					ps.close();
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			if (connection != null)
+				try {
+					connection.close();
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+		}
+		return accounts;
 	}
 	
-	public boolean ownerRelationshipExists(String discordID, String clashID) {
-		return recordExists(discordID, clashID, DiscordToClashDF.OWNER);
-	}
-	
-	public List<String> getSubscriptionsByDiscordUser(String discordUser) {
-		return this.getClashOrDiscord(discordUser, DiscordToClashDF.SUBSCRIBER, DiscordToClashDF.GET_CLASH);
-	}
-	
-	public List<String> getOwnedAccountsByDiscordUser(String discordUser) {
-		return this.getClashOrDiscord(discordUser, DiscordToClashDF.OWNER, DiscordToClashDF.GET_CLASH);
-	}
-	
+
 	public List<String> getClansByDiscordServer(String discordServer) {
-		return this.getClashOrDiscord(discordServer, DiscordToClashDF.SERVER, DiscordToClashDF.GET_CLASH);
+		return this.getClashOrDiscord(discordServer, DiscordToClashDF.GET_CLASH);
+	}
+
+	public List<String> getServersForClan(String clan) {
+		return this.getClashOrDiscord(clan, DiscordToClashDF.GET_DISCORD);
 	}
 	
-	public List<String> getSubscribersForClashID(String clashID) {
-		return this.getClashOrDiscord(clashID, DiscordToClashDF.SUBSCRIBER, DiscordToClashDF.GET_DISCORD);
+	private int addRemoveRecord(String discordServerID, String discordUserID, String clashID, String type, boolean add) {
+		int returnCode = recordExists(discordServerID, discordUserID, clashID, type);
+		if (returnCode == DiscordToClashDF.SQL_OK)
+			return DiscordToClashDF.SQL_FAILED_RECORD_EXISTS;
+		Connection connection = null;
+		PreparedStatement ps = null;
+		int rows = 0;
+		try {
+			connection = DatabaseConnectionPool.getDatabaseConnectionPool().getConnection();
+			ps = connection.prepareStatement(
+					queries.get((add == DiscordToClashDF.ADD ? "add" : "remove") + "DiscordClashRelationship"));
+			ps.setString(1, discordServerID);
+			ps.setString(2, discordUserID);
+			ps.setString(3, clashID);
+			ps.setString(4, type);
+			rows = ps.executeUpdate();
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return DiscordToClashDF.SQL_FAILED_SQL_EXCEPTION;
+			
+		} finally {
+			if (ps != null)
+				try {
+					ps.close();
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			if (connection != null)
+				try {
+					connection.close();
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+		}
+		
+		//If we modified something, it was a success.
+		if (rows > 0) return DiscordToClashDF.SQL_OK;
+		//If we didn't and it was an add, the record already exists.
+		else if (add == DiscordToClashDF.ADD) return DiscordToClashDF.SQL_FAILED_RECORD_EXISTS;
+		//If we didn't and it was a remove, the record didn't exist.
+		else return DiscordToClashDF.SQL_FAILED_NOT_FOUND;
+			
 	}
 	
-	public List<String> getOwnersForClashID(String clashID) {
-		return this.getClashOrDiscord(clashID, DiscordToClashDF.OWNER, DiscordToClashDF.GET_DISCORD);
+	public int addClashServerToDiscordServer(String discordId, String clashId) {
+		return addRemoveRecord(discordId, "0", clashId, DiscordToClashDF.SERVER, DiscordToClashDF.ADD);
 	}
 	
-	public boolean addSubscriptionToDiscordUser(String discordUser, String clashId) {
-		return this.addOrRemoveDiscordClashRelationship(discordUser, clashId, DiscordToClashDF.SUBSCRIBER, DiscordToClashDF.ADD);
+	public int removeClashServerFromDiscordServer(String discordId, String clashId) {
+		return addRemoveRecord(discordId, "0", clashId, DiscordToClashDF.SERVER, DiscordToClashDF.REMOVE);
 	}
 	
-	public boolean removeSubscriptionFromDiscordUser(String discordUser, String clashId) {
-		return this.addOrRemoveDiscordClashRelationship(discordUser, clashId, DiscordToClashDF.SUBSCRIBER, DiscordToClashDF.REMOVE);
+	public int addSubscriberByDiscordServerAndUser(String server, String user, String clashId) {
+		return addRemoveRecord(server, user, clashId, DiscordToClashDF.SUBSCRIBER, DiscordToClashDF.ADD);
 	}
 	
-	public boolean addOwnedAccountToDiscordUser(String discordUser, String clashId) {
-		return this.addOrRemoveDiscordClashRelationship(discordUser, clashId, DiscordToClashDF.OWNER, DiscordToClashDF.ADD);
+	public int removeSubscriberByDiscordServerAndUser(String server, String user, String clashId) {
+		return addRemoveRecord(server, user, clashId, DiscordToClashDF.SUBSCRIBER, DiscordToClashDF.REMOVE);
 	}
 	
-	public boolean removeOwnedAccountFromDiscordUser(String discordUser, String clashId) {
-		return this.addOrRemoveDiscordClashRelationship(discordUser, clashId, DiscordToClashDF.OWNER, DiscordToClashDF.REMOVE);
+	//TODO add a check to make sure they actually own the account at some point
+	public int addOwnerByDiscordServerAndUser(String server, String user, String clashId) {
+		return addRemoveRecord(server, user, clashId, DiscordToClashDF.OWNER, DiscordToClashDF.ADD);
 	}
 	
-	public boolean AddClanToDiscordServer(String discordServer, String clan) {
-		return this.addOrRemoveDiscordClashRelationship(discordServer, clan, DiscordToClashDF.SERVER, DiscordToClashDF.ADD);
+	public int removeOwnerByDiscordServerAndUser(String server, String user, String clashId) {
+		return addRemoveRecord(server, user, clashId, DiscordToClashDF.OWNER, DiscordToClashDF.REMOVE);
 	}
 	
-	public boolean removeClanFromDiscordServer(String discordServer, String clan) {
-		return this.addOrRemoveDiscordClashRelationship(discordServer, clan, DiscordToClashDF.SERVER, DiscordToClashDF.REMOVE);
-	}
 	
-	public List<Pair<String, String>> getDiscordClashServerPairs() {
-		return getPairsForType("V");
+	public int recordExists(String discordServerID, String discordUserID, String clashID, String type) {
+		if (discordServerID == null)
+			discordServerID = "0";
+		if (discordUserID == null)
+			discordUserID = "0";
+		if (clashID == null)
+			clashID = "0";
+		if (type == null) {
+			if (discordUserID.equals("0")) {
+				type = "B";
+			} else {
+				type = "V";
+			}
+		}
+		boolean found = false;
+		PreparedStatement ps = null;
+		Connection connection = null;
+		ResultSet rs = null;
+		try {
+			connection = DatabaseConnectionPool.getDatabaseConnectionPool().getConnection();
+			ps = connection.prepareStatement(
+					queries.get("checkIfRecordExists"));
+			ps.setString(1, discordServerID);
+			ps.setString(2, discordUserID);
+			ps.setString(3, clashID);
+			ps.setString(4, type);
+			ps.execute();
+			rs = ps.getResultSet();
+			found = rs.first();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return DiscordToClashDF.SQL_FAILED_SQL_EXCEPTION;
+		} finally {
+			if (ps != null)
+				try {
+					ps.close();
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			if (connection != null)
+				try {
+					connection.close();
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			if (rs != null)
+				try {
+					rs.close();
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+		}
+		
+		if (found) return DiscordToClashDF.SQL_OK;
+		
+		else return DiscordToClashDF.SQL_FAILED_NOT_FOUND;
+	}
+
+	public static DiscordToClashDF getDiscordtoClashDF() {
+		// TODO Auto-generated method stub
+		return DiscordToClashDF.discordToClashDF;
 	}
 }

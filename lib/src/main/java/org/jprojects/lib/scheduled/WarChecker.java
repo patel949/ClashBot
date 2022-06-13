@@ -48,8 +48,10 @@ public class WarChecker extends TimerTask {
 			if (ScapiWarAF.getInstance().isInWar(clanId)) {
 				//if in a war state, see if we know about the end date.
 				String knownEndTime = scheduled.getOrDefault(clanId, "");
-				if (ScapiWarAF.getInstance().getWarEndTime(clanId) == knownEndTime)
+				String endTime = ScapiWarAF.getInstance().getWarEndTime(clanId);
+				if (knownEndTime.equals(endTime))
 					continue;
+				scheduled.put(clanId, endTime);
 				
 				//if it's a new end date, we need to set some reminders.
 				long timeSecs = ScapiWarAF.getInstance().getRemainingWarTimeSeconds(clanId);

@@ -73,7 +73,7 @@ public class WarRunner implements Runnable {
 			//convert clashers to userIds
 			Set<String> discordUserIds = new HashSet<String>();
 			for (String clashUser : clashUserIds) {
-				discordUserIds.addAll(DiscordToClashDF.getDiscordtoClashDF().getSubscribersForClashID(clashUser));
+				discordUserIds.addAll(DiscordToClashDF.getDiscordtoClashDF().getUsersSubscribedToClashAccountOnServer(clashUser, guild.getId()));
 			}
 			
 			//convert IDs to members
