@@ -66,15 +66,17 @@ public class Subscribe extends Command {
 		String discordID = e.getMessage().getMentionedUsers().get(0).getId();
 		String discordName = e.getMessage().getMentionedMembers().get(0).getEffectiveName();
 		String clashID = command[command.length-1];
-
+		String discordServer = e.getGuild().getId();
 		if ((clashName = ScapiPlayerAF.getInstance().getPlayerNameFromTag(clashID) ) == null ) {
 			e.getChannel().sendMessage("The clash player tag " + clashID + " appears to be invalid.").queue();
 			return;
 		}
 		
-		boolean success = DiscordToClashDF.getDiscordtoClashDF().addSubscriptionToDiscordUser(discordID, clashID);
-		if (success)
+		int successCode = DiscordToClashDF.getDiscordtoClashDF().addSubscriberByDiscordServerAndUser(discordServer, discordID, clashID);
+		if (successCode == DiscordToClashDF.SQL_OK)
 			e.getChannel().sendMessage("Great! " + discordName + " is now subscribed to notifications for Clash player '" + clashName + "'").queue();
+		else if (successCode == DiscordToClashDF.SQL_FAILED_RECORD_EXISTS)
+			e.getChannel().sendMessage("Hey, " + discordName + " is already subscribed to that clash account!").queue();
 		else
 			e.getChannel().sendMessage("Uh-oh, something went wrong, but I'm not quite sure what. If this happens again, contact the dev at dev@jprojects.org with the command you tried to use.").queue();
 	}
@@ -95,9 +97,11 @@ public class Subscribe extends Command {
 		}
 		
 		//well, we have permission. we have a valid clan. we have a discord. log it.
-		boolean success = DiscordToClashDF.getDiscordtoClashDF().AddClanToDiscordServer(discordID, clashID);
-		if (success)
+		int successCode = DiscordToClashDF.getDiscordtoClashDF().addClashServerToDiscordServer(discordID, clashID);
+		if (successCode == DiscordToClashDF.SQL_OK)
 			e.getChannel().sendMessage("Great! This discord server is now subscribed to notifications for the clan '" + clashName + "'").queue();
+		else if (successCode == DiscordToClashDF.SQL_FAILED_RECORD_EXISTS)
+			e.getChannel().sendMessage("Hey, this server is already subscribed to " + clashName + "!").queue();
 		else
 			e.getChannel().sendMessage("Uh-oh, something went wrong, but I'm not quite sure what. If this happens again, contact the dev at dev@jprojects.org with the command you tried to use.").queue();
 	}

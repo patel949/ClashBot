@@ -70,10 +70,12 @@ public class Unsubscribe extends Command {
 		}
 		
 		String discordName = e.getMessage().getMentionedMembers().get(0).getEffectiveName();
-		
-		boolean success = DiscordToClashDF.getDiscordtoClashDF().removeSubscriptionFromDiscordUser(discordID, clashID);
-		if (success)
+		String discordServer = e.getGuild().getId();
+		int successCode = DiscordToClashDF.getDiscordtoClashDF().removeSubscriberByDiscordServerAndUser(discordServer, discordID, clashID);
+		if (successCode == DiscordToClashDF.SQL_OK)
 			e.getChannel().sendMessage("Great! " + discordName + " is now unsubscribed to notifications for Clash player '" + clashName + "'").queue();
+		else if (successCode == DiscordToClashDF.SQL_FAILED_NOT_FOUND)
+			e.getChannel().sendMessage("Hmm..." + discordName + " was not subscribed to clash account '" + clashName + "'. I guess that makes my job easier, though.").queue();
 		else
 			e.getChannel().sendMessage("Uh-oh, something went wrong, but I'm not quite sure what. If this happens again, contact the dev at dev@jprojects.org with the command you tried to use.").queue();
 	}
@@ -94,9 +96,11 @@ public class Unsubscribe extends Command {
 		}
 		
 		//well, we have permission. we have a valid clan. we have a discord. log it.
-		boolean success = DiscordToClashDF.getDiscordtoClashDF().removeClanFromDiscordServer(discordID, clashID);
-		if (success)
+		int successCode = DiscordToClashDF.getDiscordtoClashDF().removeClashServerFromDiscordServer(discordID, clashID);
+		if (successCode == DiscordToClashDF.SQL_OK)
 			e.getChannel().sendMessage("Great! This discord server is now unsubscribed to notifications for the clan '" + clashName + "'").queue();
+		else if (successCode == DiscordToClashDF.SQL_FAILED_NOT_FOUND)
+			e.getChannel().sendMessage("Hmm, this discord server was not subscribed to that clan. I guess that makes my job easier, though.").queue();
 		else
 			e.getChannel().sendMessage("Uh-oh, something went wrong, but I'm not quite sure what. If this happens again, contact the dev at dev@jprojects.org with the command you tried to use.").queue();
 	}

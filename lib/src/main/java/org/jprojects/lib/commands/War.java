@@ -67,7 +67,7 @@ public class War extends Command {
 				clanIds.addAll(DiscordToClashDF.getDiscordtoClashDF().getClansByDiscordServer(e.getGuild().getId()));
 			} else {
 				//Check if clan is subscribed to:
-				if( DiscordToClashDF.getDiscordtoClashDF().serverRelationshipExists(e.getGuild().getId(),command[2]) )
+				if( DiscordToClashDF.getDiscordtoClashDF().recordExists(e.getGuild().getId(), null, command[2], null) == DiscordToClashDF.SQL_OK)
 					clanIds.add(command[2]);
 				else {
 					e.getChannel().sendMessage("It looks like you entered an invalid clan.").queue();
@@ -89,7 +89,7 @@ public class War extends Command {
 				//convert clashers to userIds
 				Set<String> discordUserIds = new HashSet<String>();
 				for (String clashUser : clashUserIds) {
-					discordUserIds.addAll(DiscordToClashDF.getDiscordtoClashDF().getSubscribersForClashID(clashUser));
+					discordUserIds.addAll(DiscordToClashDF.getDiscordtoClashDF().getUsersSubscribedToClashAccountOnServer(clashUser, guild.getId()));
 				}
 				
 				//convert IDs to members
@@ -112,7 +112,7 @@ public class War extends Command {
 					boolean plural = false;
 					StringBuilder sb = new StringBuilder();
 					for (String clashUser : clashUserIds) {
-						if (DiscordToClashDF.getDiscordtoClashDF().subscriberRelationshipExists(pingMe.getUser().getId(), clashUser) || DiscordToClashDF.getDiscordtoClashDF().ownerRelationshipExists(pingMe.getUser().getId(), clashUser)) {
+						if (DiscordToClashDF.getDiscordtoClashDF().recordExists(pingMe.getGuild().getId(), pingMe.getUser().getId(), clashUser, null) == DiscordToClashDF.SQL_OK || DiscordToClashDF.getDiscordtoClashDF().recordExists(pingMe.getGuild().getId(), pingMe.getUser().getId(), clashUser, "O") == DiscordToClashDF.SQL_OK) {
 							if (sb.length() > 0) {
 								plural = true;
 								sb.append(", ");
