@@ -14,7 +14,7 @@ public class BOTConstants {
 	public static final String OWNER_RELATION = "O";
 	public static final String SERVER_RELATION = "V";
 	
-	public static final String IDENTITY_SCHEMA = "identify";
+	public static final String IDENTITY_SCHEMA = DEBUG ? "identify_dev" : "identify";
 	
 	public static final int SQL_OK = 0;
 	public static final int SQL_FAILED_RECORD_EXISTS = 1;
