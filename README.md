@@ -7,32 +7,34 @@ Java class org.jprojects.lib.Token, or src/main/java/org/jprojects/lib/Token.jav
 It should look something like this:
 package org.jprojects.lib;
 
-import org.jprojects.lib.constants.BOTConstants;
+	import org.jprojects.lib.constants.BOTConstants;
 
 	public class Token {
 		public static String getDiscordToken() {
-	    return BOTConstants.DEBUG ? // DISCORD BOT DEV TOKEN, or just null if you don't have a dev bot
-	    : //DISCORD BOT TOKEN
-	    ;
-	  }
+	    		return BOTConstants.DEBUG ? // DISCORD BOT DEV TOKEN, or just null if you don't have a dev bot
+	    		: //DISCORD BOT TOKEN
+	    		;
+	  	}
 
-	  public static String getUsername() {
+	  	public static String getUsername() {
 			return //Put your Clash of Clans Developer account email here
-	    ;
+	    		;
 		}
 		public static String getPassword() {
 			return  //Put your Clash of Clans Developer Account password here (I don't really like it either but eh...)
-	    ;
-
+	    		;
+		}
+		
 		public static String getDBUsername() {
 			return // Put your MYSQL Database Username here
-	    ;
+	    		;
 		}
 
 		public static String getDBPassword() {
 			return // Put your MYSQL Database password here
-	    ;
+	    		;
 		}
+	}
   
   /////////////////// END OF FILE ///////////////////
   
