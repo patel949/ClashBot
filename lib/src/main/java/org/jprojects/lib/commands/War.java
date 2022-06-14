@@ -9,6 +9,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import org.jprojects.lib.Main;
+import org.jprojects.lib.constants.BOTConstants;
 import org.jprojects.lib.database.DiscordToClashDF;
 import org.jprojects.lib.database.ServerDataDF;
 import org.jprojects.scapi.ScapiClanAF;
@@ -67,7 +68,7 @@ public class War extends Command {
 				clanIds.addAll(DiscordToClashDF.getDiscordtoClashDF().getClansByDiscordServer(e.getGuild().getId()));
 			} else {
 				//Check if clan is subscribed to:
-				if( DiscordToClashDF.getDiscordtoClashDF().recordExists(e.getGuild().getId(), null, command[2], null) == DiscordToClashDF.SQL_OK)
+				if( DiscordToClashDF.getDiscordtoClashDF().recordExists(e.getGuild().getId(), null, command[2], null) == BOTConstants.SQL_OK)
 					clanIds.add(command[2]);
 				else {
 					e.getChannel().sendMessage("It looks like you entered an invalid clan.").queue();
@@ -112,7 +113,7 @@ public class War extends Command {
 					boolean plural = false;
 					StringBuilder sb = new StringBuilder();
 					for (String clashUser : clashUserIds) {
-						if (DiscordToClashDF.getDiscordtoClashDF().recordExists(pingMe.getGuild().getId(), pingMe.getUser().getId(), clashUser, null) == DiscordToClashDF.SQL_OK || DiscordToClashDF.getDiscordtoClashDF().recordExists(pingMe.getGuild().getId(), pingMe.getUser().getId(), clashUser, "O") == DiscordToClashDF.SQL_OK) {
+						if (DiscordToClashDF.getDiscordtoClashDF().recordExists(pingMe.getGuild().getId(), pingMe.getUser().getId(), clashUser, null) == BOTConstants.SQL_OK || DiscordToClashDF.getDiscordtoClashDF().recordExists(pingMe.getGuild().getId(), pingMe.getUser().getId(), clashUser, "O") == BOTConstants.SQL_OK) {
 							if (sb.length() > 0) {
 								plural = true;
 								sb.append(", ");
