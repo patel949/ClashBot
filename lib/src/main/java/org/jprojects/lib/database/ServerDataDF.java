@@ -10,19 +10,19 @@ import java.util.List;
 import java.util.Map;
 
 import org.jprojects.lib.Main;
+import org.jprojects.lib.constants.BOTConstants;
 
 public class ServerDataDF {
 	private static Map<String, String> queries;
 	
-	private static final String SCHEMA = "identify";
 	private static final String TABLE_NAME = "iden003_discord_server_data";
 	
 	static {
 		queries = new HashMap<String,String>();
 		queries.put("getServerDataByID", 
-				"SELECT * FROM " + ServerDataDF.SCHEMA + "." + ServerDataDF.TABLE_NAME + " a WHERE IDEN001_DISCORD_ID=?");
+				"SELECT * FROM " + BOTConstants.IDENTITY_SCHEMA + "." + ServerDataDF.TABLE_NAME + " WHERE IDEN001_DISCORD_ID=?");
 		queries.put("addNewServerDataToDatabase", 
-				"INSERT INTO " + ServerDataDF.SCHEMA + "." + ServerDataDF.TABLE_NAME + " (IDEN001_DISCORD_ID, IDEN003_PREFIX, IDEN003_DEFAULT_CHANNEL, IDEN003_WAR_MESSAGE_1, IDEN003_WAR_MESSAGE_2) VALUES(?,?,?,?,?)");
+				"INSERT INTO " + BOTConstants.IDENTITY_SCHEMA + "." + ServerDataDF.TABLE_NAME + " (IDEN001_DISCORD_ID, IDEN003_PREFIX, IDEN003_DEFAULT_CHANNEL, IDEN003_WAR_MESSAGE_1, IDEN003_WAR_MESSAGE_2) VALUES(?,?,?,?,?)");
 	}
 	
 	private static final HashMap<String, ServerDataDF> cache = new HashMap<String, ServerDataDF>();
@@ -138,7 +138,7 @@ public class ServerDataDF {
 		
 		List<String> changed = new ArrayList<String>();
 		StringBuilder sb = new StringBuilder();
-		sb.append("UPDATE " + ServerDataDF.SCHEMA + "." + ServerDataDF.TABLE_NAME + " SET");
+		sb.append("UPDATE " + BOTConstants.IDENTITY_SCHEMA + "." + ServerDataDF.TABLE_NAME + " SET");
 		if (this.prefix != sd.prefix) {
 			sb.append(" IDEN003_PREFIX=?,");
 			changed.add(this.prefix);

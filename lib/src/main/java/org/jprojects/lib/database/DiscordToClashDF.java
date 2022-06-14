@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.jprojects.lib.constants.BOTConstants;
 import org.jprojects.lib.util.Pair;
 
 public class DiscordToClashDF {
@@ -25,34 +26,25 @@ public class DiscordToClashDF {
 	private static final boolean GET_CLASH = true;
 	private static final boolean GET_DISCORD = !GET_CLASH;
 	
-	private static final String SUBSCRIBER = "B";
-	private static final String OWNER = "O";
-	private static final String SERVER = "V";
 	
-	public static final int SQL_OK = 0;
-	public static final int SQL_FAILED_RECORD_EXISTS = 1;
-	public static final int SQL_FAILED_NOT_FOUND = 2;
-	public static final int SQL_FAILED_SQL_EXCEPTION = 3;
-	
-	private static final String SCHEMA = "identify";
 	private static final String TABLE_NAME = "iden001_discord_to_clash";
 	
 	private DiscordToClashDF() {
 		queries = new HashMap<String,String>();
 		queries.put("getIdPairsByType", 
-				"SELECT IDEN001_DISCORD_ID, IDEN001_CLASH_ID FROM " + DiscordToClashDF.SCHEMA + "." + DiscordToClashDF.TABLE_NAME + " WHERE IDEN001_TYPE='" + DiscordToClashDF.SERVER + "'");
+				"SELECT IDEN001_DISCORD_ID, IDEN001_CLASH_ID FROM " + BOTConstants.IDENTITY_SCHEMA + "." + DiscordToClashDF.TABLE_NAME + " WHERE IDEN001_TYPE='" + BOTConstants.SERVER_RELATION + "'");
 		queries.put("getUsersSubscriptionsOnServer", 
-				"SELECT IDEN001_CLASH_ID FROM " + DiscordToClashDF.SCHEMA + "." + DiscordToClashDF.TABLE_NAME + " WHERE IDEN001_TYPE='" + DiscordToClashDF.SUBSCRIBER + "' AND IDEN001_DISCORD_USR_ID=? AND IDEN001_DISCORD_ID=?");
+				"SELECT IDEN001_CLASH_ID FROM " + BOTConstants.IDENTITY_SCHEMA + "." + DiscordToClashDF.TABLE_NAME + " WHERE IDEN001_TYPE='" + BOTConstants.SUBSCRIBER_RELATION + "' AND IDEN001_DISCORD_USR_ID=? AND IDEN001_DISCORD_ID=?");
 		queries.put("getUsersSubscriptionsOwnsOnServer", 
-				"SELECT IDEN001_DISCORD_USR_ID FROM " + DiscordToClashDF.SCHEMA + "." + DiscordToClashDF.TABLE_NAME + " WHERE IDEN001_TYPE=? AND IDEN001_CLASH_ID=? AND IDEN001_DISCORD_ID=?");
+				"SELECT IDEN001_DISCORD_USR_ID FROM " + BOTConstants.IDENTITY_SCHEMA + "." + DiscordToClashDF.TABLE_NAME + " WHERE IDEN001_TYPE=? AND IDEN001_CLASH_ID=? AND IDEN001_DISCORD_ID=?");
 		queries.put("getClashByDiscord", 
-				"SELECT IDEN001_CLASH_ID FROM " + DiscordToClashDF.SCHEMA + "." + DiscordToClashDF.TABLE_NAME + " WHERE IDEN001_TYPE='"+DiscordToClashDF.SERVER+"' AND IDEN001_DISCORD_ID=?");
+				"SELECT IDEN001_CLASH_ID FROM " + BOTConstants.IDENTITY_SCHEMA + "." + DiscordToClashDF.TABLE_NAME + " WHERE IDEN001_TYPE='"+BOTConstants.SERVER_RELATION+"' AND IDEN001_DISCORD_ID=?");
 		queries.put("getDiscordByClash", 
-				"SELECT IDEN001_DISCORD_ID FROM " + DiscordToClashDF.SCHEMA + "." + DiscordToClashDF.TABLE_NAME + " WHERE IDEN001_TYPE='"+DiscordToClashDF.SERVER+"' AND IDEN001_CLASH_ID=?");
+				"SELECT IDEN001_DISCORD_ID FROM " + BOTConstants.IDENTITY_SCHEMA + "." + DiscordToClashDF.TABLE_NAME + " WHERE IDEN001_TYPE='"+BOTConstants.SERVER_RELATION+"' AND IDEN001_CLASH_ID=?");
 		queries.put("getMonitoredClans",
-				"SELECT IDEN001_CLASH_ID FROM " + DiscordToClashDF.SCHEMA + "." + DiscordToClashDF.TABLE_NAME + " where IDEN001_TYPE=" + DiscordToClashDF.SERVER);
+				"SELECT IDEN001_CLASH_ID FROM " + BOTConstants.IDENTITY_SCHEMA + "." + DiscordToClashDF.TABLE_NAME + " where IDEN001_TYPE=" + BOTConstants.SERVER_RELATION);
 		queries.put("checkIfRecordExists",
-				"SELECT * FROM " + DiscordToClashDF.SCHEMA + "." + DiscordToClashDF.TABLE_NAME + " WHERE IDEN001_DISCORD_ID=? AND IDEN001_DISCORD_USR_ID=? AND IDEN001_CLASH_ID=? AND IDEN001_TYPE=?");
+				"SELECT * FROM " + BOTConstants.IDENTITY_SCHEMA + "." + DiscordToClashDF.TABLE_NAME + " WHERE IDEN001_DISCORD_ID=? AND IDEN001_DISCORD_USR_ID=? AND IDEN001_CLASH_ID=? AND IDEN001_TYPE=?");
 	
 	}
 	
@@ -149,11 +141,11 @@ public class DiscordToClashDF {
 	}
 	
 	public List<String> getUsersOwnedAccounts(String userDiscordID) {
-		return getUsersSubscriptionsOwnsOnServer(userDiscordID, "0",DiscordToClashDF.OWNER);
+		return getUsersSubscriptionsOwnsOnServer(userDiscordID, "0",BOTConstants.OWNER_RELATION);
 	}
 	
 	public List<String> getUsersSubscriptionsOnServer(String userDiscordID, String serverDiscordID) {
-		return getUsersSubscriptionsOwnsOnServer(userDiscordID, serverDiscordID, DiscordToClashDF.SUBSCRIBER);
+		return getUsersSubscriptionsOwnsOnServer(userDiscordID, serverDiscordID, BOTConstants.SUBSCRIBER_RELATION);
 	}
 	
 	private List<String> getUsersSubscriptionsOwnsOnServer(String userDiscordID, String serverDiscordID, String type) {
@@ -294,8 +286,8 @@ public class DiscordToClashDF {
 	
 	private int addRemoveRecord(String discordServerID, String discordUserID, String clashID, String type, boolean add) {
 		int returnCode = recordExists(discordServerID, discordUserID, clashID, type);
-		if (returnCode == DiscordToClashDF.SQL_OK)
-			return DiscordToClashDF.SQL_FAILED_RECORD_EXISTS;
+		if (returnCode == BOTConstants.SQL_OK)
+			return BOTConstants.SQL_FAILED_RECORD_EXISTS;
 		Connection connection = null;
 		PreparedStatement ps = null;
 		int rows = 0;
@@ -310,7 +302,7 @@ public class DiscordToClashDF {
 			rows = ps.executeUpdate();
 		} catch (SQLException e) {
 			e.printStackTrace();
-			return DiscordToClashDF.SQL_FAILED_SQL_EXCEPTION;
+			return BOTConstants.SQL_FAILED_SQL_EXCEPTION;
 			
 		} finally {
 			if (ps != null)
@@ -330,37 +322,37 @@ public class DiscordToClashDF {
 		}
 		
 		//If we modified something, it was a success.
-		if (rows > 0) return DiscordToClashDF.SQL_OK;
+		if (rows > 0) return BOTConstants.SQL_OK;
 		//If we didn't and it was an add, the record already exists.
-		else if (add == DiscordToClashDF.ADD) return DiscordToClashDF.SQL_FAILED_RECORD_EXISTS;
+		else if (add == DiscordToClashDF.ADD) return BOTConstants.SQL_FAILED_RECORD_EXISTS;
 		//If we didn't and it was a remove, the record didn't exist.
-		else return DiscordToClashDF.SQL_FAILED_NOT_FOUND;
+		else return BOTConstants.SQL_FAILED_NOT_FOUND;
 			
 	}
 	
 	public int addClashServerToDiscordServer(String discordId, String clashId) {
-		return addRemoveRecord(discordId, "0", clashId, DiscordToClashDF.SERVER, DiscordToClashDF.ADD);
+		return addRemoveRecord(discordId, "0", clashId, BOTConstants.SERVER_RELATION, DiscordToClashDF.ADD);
 	}
 	
 	public int removeClashServerFromDiscordServer(String discordId, String clashId) {
-		return addRemoveRecord(discordId, "0", clashId, DiscordToClashDF.SERVER, DiscordToClashDF.REMOVE);
+		return addRemoveRecord(discordId, "0", clashId, BOTConstants.SERVER_RELATION, DiscordToClashDF.REMOVE);
 	}
 	
 	public int addSubscriberByDiscordServerAndUser(String server, String user, String clashId) {
-		return addRemoveRecord(server, user, clashId, DiscordToClashDF.SUBSCRIBER, DiscordToClashDF.ADD);
+		return addRemoveRecord(server, user, clashId, BOTConstants.SUBSCRIBER_RELATION, DiscordToClashDF.ADD);
 	}
 	
 	public int removeSubscriberByDiscordServerAndUser(String server, String user, String clashId) {
-		return addRemoveRecord(server, user, clashId, DiscordToClashDF.SUBSCRIBER, DiscordToClashDF.REMOVE);
+		return addRemoveRecord(server, user, clashId, BOTConstants.SUBSCRIBER_RELATION, DiscordToClashDF.REMOVE);
 	}
 	
 	//TODO add a check to make sure they actually own the account at some point
 	public int addOwnerByDiscordServerAndUser(String server, String user, String clashId) {
-		return addRemoveRecord(server, user, clashId, DiscordToClashDF.OWNER, DiscordToClashDF.ADD);
+		return addRemoveRecord(server, user, clashId, BOTConstants.OWNER_RELATION, DiscordToClashDF.ADD);
 	}
 	
 	public int removeOwnerByDiscordServerAndUser(String server, String user, String clashId) {
-		return addRemoveRecord(server, user, clashId, DiscordToClashDF.OWNER, DiscordToClashDF.REMOVE);
+		return addRemoveRecord(server, user, clashId, BOTConstants.OWNER_RELATION, DiscordToClashDF.REMOVE);
 	}
 	
 	
@@ -396,7 +388,7 @@ public class DiscordToClashDF {
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-			return DiscordToClashDF.SQL_FAILED_SQL_EXCEPTION;
+			return BOTConstants.SQL_FAILED_SQL_EXCEPTION;
 		} finally {
 			if (ps != null)
 				try {
@@ -421,9 +413,9 @@ public class DiscordToClashDF {
 				}
 		}
 		
-		if (found) return DiscordToClashDF.SQL_OK;
+		if (found) return BOTConstants.SQL_OK;
 		
-		else return DiscordToClashDF.SQL_FAILED_NOT_FOUND;
+		else return BOTConstants.SQL_FAILED_NOT_FOUND;
 	}
 
 	public static DiscordToClashDF getDiscordtoClashDF() {
