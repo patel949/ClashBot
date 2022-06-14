@@ -45,7 +45,11 @@ public class DiscordToClashDF {
 				"SELECT IDEN001_CLASH_ID FROM " + BOTConstants.IDENTITY_SCHEMA + "." + DiscordToClashDF.TABLE_NAME + " where IDEN001_TYPE=" + BOTConstants.SERVER_RELATION);
 		queries.put("checkIfRecordExists",
 				"SELECT * FROM " + BOTConstants.IDENTITY_SCHEMA + "." + DiscordToClashDF.TABLE_NAME + " WHERE IDEN001_DISCORD_ID=? AND IDEN001_DISCORD_USR_ID=? AND IDEN001_CLASH_ID=? AND IDEN001_TYPE=?");
-	
+		queries.put("addDiscordClashRelationship",
+				"INSERT INTO " + BOTConstants.IDENTITY_SCHEMA + "." + DiscordToClashDF.TABLE_NAME + " (IDEN001_DISCORD_ID, IDEN001_DISCORD_USR_ID, IDEN001_CLASH_ID, IDEN001_TYPE) VALUES (?,?,?,?)");
+		queries.put("removeDiscordClashRelationship", 
+				"DELETE FROM " + BOTConstants.IDENTITY_SCHEMA + "." + DiscordToClashDF.TABLE_NAME + " WHERE IDEN001_DISCORD_ID=? AND IDEN001_DISCORD_USR_ID=? AND IDEN001_CLASH_ID=? AND IDEN001_TYPE=?");
+		
 	}
 	
 	public List<Pair<String, String>> getDiscordClashServerPairs() {
@@ -286,8 +290,10 @@ public class DiscordToClashDF {
 	
 	private int addRemoveRecord(String discordServerID, String discordUserID, String clashID, String type, boolean add) {
 		int returnCode = recordExists(discordServerID, discordUserID, clashID, type);
-		if (returnCode == BOTConstants.SQL_OK)
+		if (returnCode == BOTConstants.SQL_OK && add == DiscordToClashDF.ADD)
 			return BOTConstants.SQL_FAILED_RECORD_EXISTS;
+		if ((returnCode == BOTConstants.SQL_FAILED_NOT_FOUND && add == DiscordToClashDF.REMOVE))
+			return BOTConstants.SQL_FAILED_NOT_FOUND;
 		Connection connection = null;
 		PreparedStatement ps = null;
 		int rows = 0;
