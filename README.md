@@ -5,7 +5,8 @@ Hey so everything you need to get started is probably more or less here. I've le
 Java class org.jprojects.lib.Token, or src/main/java/org/jprojects/lib/Token.java
 
 It should look something like this:
-package org.jprojects.lib;
+
+	package org.jprojects.lib;
 
 	import org.jprojects.lib.constants.BOTConstants;
 
