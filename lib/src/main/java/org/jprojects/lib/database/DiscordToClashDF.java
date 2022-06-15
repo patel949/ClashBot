@@ -33,6 +33,8 @@ public class DiscordToClashDF {
 		queries = new HashMap<String,String>();
 		queries.put("getIdPairsByType", 
 				"SELECT IDEN001_DISCORD_ID, IDEN001_CLASH_ID FROM " + BOTConstants.IDENTITY_SCHEMA + "." + DiscordToClashDF.TABLE_NAME + " WHERE IDEN001_TYPE='" + BOTConstants.SERVER_RELATION + "'");
+		queries.put("getUsersSubscribedToClashAccountOnServer",
+				"SELECT IDEN001_DISCORD_USR_ID FROM " + BOTConstants.IDENTITY_SCHEMA + "." + DiscordToClashDF.TABLE_NAME + " WHERE IDEN001_TYPE='" + BOTConstants.SUBSCRIBER_RELATION + "' AND IDEN001_CLASH_ID=? AND IDEN001_DISCORD_ID=?");
 		queries.put("getUsersSubscriptionsOnServer", 
 				"SELECT IDEN001_CLASH_ID FROM " + BOTConstants.IDENTITY_SCHEMA + "." + DiscordToClashDF.TABLE_NAME + " WHERE IDEN001_TYPE='" + BOTConstants.SUBSCRIBER_RELATION + "' AND IDEN001_DISCORD_USR_ID=? AND IDEN001_DISCORD_ID=?");
 		queries.put("getUsersSubscriptionsOwnsOnServer", 
