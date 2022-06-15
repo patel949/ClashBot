@@ -153,7 +153,7 @@ public class ScapiWarAF {
 			for (ClanWarMember c : potential) {
 				int attacksPerformed = c.getAttacks() == null ? 0 : c.getAttacks().size();
 				if (info.getStartTimeAsDate().after(now) || attacksPerformed < 2) {
-					System.out.println(c.getName() + " has " + (2 - attacksPerformed) + " attacks left. ");
+					System.out.println(c.getName() + " ("+c.getTag()+") has " + (2 - attacksPerformed) + " attacks left. ");
 					userIds.add(c.getTag());
 				} else {
 					System.out.println(c.getName() + " used all attacks. ");
