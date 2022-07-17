@@ -44,24 +44,31 @@ public class MessageListener extends ListenerAdapter{
 	
 	@Override
 	public void onMessageReceived(MessageReceivedEvent event) {
-		//When we receive a message, we need to check to see if it starts with our prefix.
-		if (event.getMessage() != null) {
-			String message = event.getMessage().getContentDisplay().toLowerCase();
-			String prefix = ServerDataDF.getServer(event.getGuild().getId()).getPrefix();
-			if (message.startsWith(prefix)) {
-				String[] words = message.substring(prefix.length()).split(" ");
-				String command = words[0];
-				if (command.equals("") && words.length > 1) {
-					command = words[1]; //we will allow a space.
-					String[] temp = new String[words.length-1];
-					System.arraycopy(words, 1, temp, 0, temp.length);
-					words = temp;
-				}
-				if (commandMap.containsKey(command))
-					commandMap.get(command).execute(event,words);
-				else
-					unknownCommand(event);
+		//if event message is for some reason null, discars.
+		if (event == null)
+			return;
+		
+		//if event message is from a bot, ignore to help prevent dos
+		if (event.getAuthor().isBot())
+			return;
+		
+		
+		//Otherwise, check to see if it starts with our prefix.
+		String message = event.getMessage().getContentDisplay().toLowerCase();
+		String prefix = ServerDataDF.getServer(event.getGuild().getId()).getPrefix();
+		if (message.startsWith(prefix)) {
+			String[] words = message.substring(prefix.length()).split(" ");
+			String command = words[0];
+			if (command.equals("") && words.length > 1) {
+				command = words[1]; //we will allow a space.
+				String[] temp = new String[words.length-1];
+				System.arraycopy(words, 1, temp, 0, temp.length);
+				words = temp;
 			}
+			if (commandMap.containsKey(command))
+				commandMap.get(command).execute(event,words);
+			else
+				unknownCommand(event);
 		}
 			
 	}

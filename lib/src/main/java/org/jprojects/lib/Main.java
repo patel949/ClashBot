@@ -4,6 +4,7 @@ import java.util.Timer;
 
 import javax.security.auth.login.LoginException;
 
+import org.jprojects.lib.constants.BOTConstants;
 import org.jprojects.lib.scheduled.WarChecker;
 import org.jprojects.scapi.JClashManager;
 
@@ -16,6 +17,9 @@ public class Main {
 	private static String TOKEN = Token.getDiscordToken(); //Token hidden on git
 	
 	public static void main(String[] args) {
+		if (BOTConstants.DEBUG)
+			System.out.println("/n**********/nStarting bot in DEVELOPMENT MODE/n**********");
+		System.out.println("Using " + BOTConstants.IDENTITY_SCHEMA + " schema for DB Identity Queries.");
 		
 		//Start JDA
 		try {
